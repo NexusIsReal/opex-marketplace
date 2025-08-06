@@ -11,6 +11,18 @@
   font-weight: 500;
 }
 
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap');
+}
+
+.font-golos {
+  font-family: 'Golos Text', var(--font-geist-sans), sans-serif;
+}
+
 .text-shadow-subtle {
   text-shadow: 0 2px 10px rgba(255,255,255,0.15);
 }

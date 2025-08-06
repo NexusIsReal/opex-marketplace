@@ -56,7 +56,7 @@ export default function Home() {
               animateBy="words"
               direction="top"
               onAnimationComplete={handleAnimationComplete}
-              className="text-3xl md:text-5xl text-white font-['Poppins'] tracking-tight leading-tight inline-block"
+              className="text-3xl md:text-5xl text-white font-golos tracking-tight leading-tight inline-block"
             />
           </div>
           
@@ -74,7 +74,7 @@ export default function Home() {
           delay={100} 
           animateBy="words" 
           direction="top" 
-          className="mb-10 text-2xl font-['Raleway'] tracking-tight leading-tight inline-block"
+          className="mb-10 text-2xl font-golos tracking-tight leading-tight inline-block"
           />
           
           <FadeIn delay={0.8} duration={0.8} direction="up" className="relative max-w-xl mx-auto mb-8">
