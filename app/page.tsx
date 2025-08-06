@@ -2,28 +2,27 @@
 
 import AnimatedText from "@/components/AnimatedText";
 import FadeIn from "@/components/FadeIn";
-import Beams from "@/components/Beams";
 import BlurText from "@/components/BlurText";
 import ShinyText from "@/components/ShinyText";
 import TrueFocus from "@/components/TrueFocus";
+import DarkVeil from "@/components/DarkVeil";
 export default function Home() {
   const handleAnimationComplete = () => {
     console.log("Animation complete");
   };
   return (
     <div className="min-h-screen flex flex-col relative">
-      {/* Beams background */}
+      {/* DarkVeil background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
-        <Beams
-            beamWidth={2}
-            beamHeight={15}
-            beamNumber={12}
-            lightColor="#ffffff"
-            speed={2}
-            noiseIntensity={1.75}
-            scale={0.2}
-            rotation={0}
+          <DarkVeil 
+            hueShift={15} 
+            noiseIntensity={0.00} 
+            scanlineIntensity={0.00} 
+            speed={0.00} 
+            scanlineFrequency={0.00} 
+            warpAmount={0.00} 
+            resolutionScale={1} 
           />
         </div>
       </div>
