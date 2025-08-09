@@ -7,6 +7,8 @@ import ShinyText from "@/components/ShinyText";
 import TrueFocus from "@/components/TrueFocus";
 import DarkVeil from "@/components/DarkVeil";
 import GlowCard from "@/components/GlowCard";
+import SearchInput from "@/components/SearchInput";
+import { LiquidButton } from "@/components/animate-ui/buttons/liquid";
 export default function Home() {
   const handleAnimationComplete = () => {
     console.log("Animation complete");
@@ -27,24 +29,8 @@ export default function Home() {
           />
         </div>
       </div>
-      {/* Floating translucent header with rounded borders - horizontally compact */}
-      <div className="sticky top-0 z-50 py-3 w-[90%] max-w-[1000px] mx-auto">
-        <header className="flex justify-between items-center p-4 rounded-xl backdrop-blur-md bg-[#0a0a0a]/70 border border-[#222]/50 shadow-lg">
-          <div className="flex items-center">
-            <h1 className="text-xl font-bold text-white mr-2">OPEX</h1>
-            <span className="text-sm text-[#999]">Freelance</span>
-          </div>
-          <nav className="hidden md:flex space-x-5">
-            <a href="#" className="text-sm text-[#ccc] hover:text-white transition-colors duration-300">Dashboard</a>
-            <a href="#" className="text-sm text-[#ccc] hover:text-white transition-colors duration-300">Hiring</a>
-            <a href="#" className="text-sm text-[#ccc] hover:text-white transition-colors duration-300">Projects</a>
-          </nav>
-          <div className="flex items-center space-x-4">
-            <a href="#" className="text-sm text-[#ccc] hover:text-white transition-colors duration-300">Login</a>
-            <a href="#" className="px-4 py-2 rounded-md bg-[#9945FF] text-white text-sm hover:bg-[#7A35D9] transition-all duration-300 hover:shadow-[0_0_15px_rgba(153,69,255,0.5)]">Sign Up</a>
-          </div>
-        </header>
-      </div>
+      {/* Header is rendered globally in RootLayout; spacer to offset fixed header */}
+      <div className="h-20" />
 
       {/* Hero Section - Transparent with enhanced GSAP animations */}
       <section className="py-16 px-4 overflow-hidden relative z-10">
@@ -78,18 +64,20 @@ export default function Home() {
           />
           
           <FadeIn delay={0.8} duration={0.8} direction="up" className="relative max-w-xl mx-auto mb-8">
-            <div className="group relative">
-              <input 
-                type="text" 
-                placeholder="Search for a service project" 
-                className="w-full p-4 pl-12 rounded-md bg-[#151515] text-white border border-[#333] focus:border-[#9945FF] focus:outline-none placeholder-[#666] transition-all duration-300 hover:border-[#444] focus:shadow-lg focus:shadow-[#9945FF]/20 font-geist-sans"
-              />
-              <button className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 rounded-md bg-[#9945FF] text-white text-sm hover:bg-[#7A35D9] transition-all duration-300 hover:shadow-[0_0_10px_rgba(153,69,255,0.4)]">
-                Search
-              </button>
-              <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#666] group-hover:text-[#9945FF] transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
+            <div className="flex justify-center">
+              <SearchInput />
+            </div>
+          </FadeIn>
+
+          <FadeIn delay={1.0} duration={0.8} direction="up">
+            <div className="mt-4 flex justify-center">
+              <LiquidButton
+                variant="default"
+                size="lg"
+                className="[--primary:#9945FF] text-white !bg-[#0f0f0f] border border-[#2a2a2a] px-8"
+              >
+                Get Started
+              </LiquidButton>
             </div>
           </FadeIn>
         </div>
@@ -375,28 +363,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer - Minimalistic transparent theme with animations */}
-      <footer className="mt-auto py-10 px-4 border-t border-[#222] relative z-10">
-        <div className="max-w-6xl mx-auto">
-          <FadeIn delay={0.2} duration={0.8} direction="up">
-            <div className="flex flex-col md:flex-row justify-between items-center">
-              <div className="mb-6 md:mb-0">
-                <h1 className="text-xl font-bold text-[#9945FF] font-geist-sans">OPEX Freelance</h1>
-                <p className="text-xs text-[#666] mt-1 font-geist-sans">© 2025 OPEX Freelance. All rights reserved.</p>
-              </div>
-              <div className="flex flex-wrap justify-center md:justify-end gap-4 md:gap-6">
-                <a href="#" className="text-sm text-[#999] hover:text-[#9945FF] transition-colors duration-300 font-geist-sans">Dashboard</a>
-                <a href="#" className="text-sm text-[#999] hover:text-[#9945FF] transition-colors duration-300 font-geist-sans">Hiring</a>
-                <a href="#" className="text-sm text-[#999] hover:text-[#9945FF] transition-colors duration-300 font-geist-sans">Projects</a>
-                <a href="#" className="text-sm text-[#999] hover:text-[#9945FF] transition-colors duration-300 font-geist-sans">About</a>
-                <a href="#" className="text-sm text-[#999] hover:text-[#9945FF] transition-colors duration-300 font-geist-sans">Terms</a>
-                <a href="#" className="text-sm text-[#999] hover:text-[#9945FF] transition-colors duration-300 font-geist-sans">Privacy</a>
-                <a href="#" className="text-sm text-[#999] hover:text-[#9945FF] transition-colors duration-300 font-geist-sans">Contact</a>
-              </div>
-            </div>
-          </FadeIn>
-        </div>
-      </footer>
+      {/* Footer is rendered globally in RootLayout */}
     </div>
   );
 }
