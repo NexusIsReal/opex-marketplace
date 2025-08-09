@@ -73,8 +73,9 @@ function Badge({ children, variant = 'default' }: { children: React.ReactNode; v
 
 export const dynamic = 'force-dynamic';
 
-export default async function ProfilePage({ params }: { params: { username: string } }) {
-  const profile = await getProfile(params.username);
+export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
+  const { username } = await params;
+  const profile = await getProfile(username);
   if (!profile) return notFound();
 
   return (
@@ -113,7 +114,11 @@ export default async function ProfilePage({ params }: { params: { username: stri
                     <div className="relative">
                       <div className="w-32 h-32 rounded-3xl overflow-hidden border-4 border-gray-500/20 shadow-2xl">
                         {profile.avatarUrl ? (
-                          <Image src={profile.avatarUrl} alt={profile.displayName} fill className="object-cover" />
+                          profile.avatarUrl.toLowerCase().includes('.svg') || profile.avatarUrl.includes('/svg') ? (
+                            <img src={profile.avatarUrl} alt={profile.displayName} className="w-full h-full object-cover" />
+                          ) : (
+                            <Image src={profile.avatarUrl} alt={profile.displayName} fill className="object-cover" />
+                          )
                         ) : (
                           <div className="w-full h-full bg-gray-800 flex items-center justify-center text-gray-400 text-3xl font-bold">
                             {profile.displayName[0]}
