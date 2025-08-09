@@ -39,40 +39,55 @@ const SearchInput = () => {
 }
 
 const StyledWrapper = styled.div`
+  position: relative;
+  /* Make the search component span wider while centered */
+  width: 100%;
+  max-width: 1000px; /* wider than before */
+  margin-inline: auto;
   .white,
   .border,
   .darkBorderBg,
   .glow {
     max-height: 70px;
-    max-width: 314px;
+    max-width: 100%;
     height: 100%;
     width: 100%;
     position: absolute;
+    top: 0;
+    left: 0;
     overflow: hidden;
     z-index: -1;
-    border-radius: 12px;
+    border-radius: 10px; /* match input */
     filter: blur(3px);
   }
+
+  /* original layered borders enabled; only positioning has been fixed above */
 
   .input {
     background-color: #060010; /* Dark theme background */
     color: #ffffff; /* White text for dark theme */
     border: none;
-    width: 301px;
+    width: 100%;
     height: 56px;
     border-radius: 10px;
     padding-inline: 59px;
     font-size: 18px;
+    box-sizing: border-box;
   }
 
   #poda {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    width: 100%;
+    height: 56px; /* match input height */
+    border-radius: 10px; /* ensure consistent rounding */
   }
 
   .input::placeholder {
-    color: #666; /* Subtle gray for placeholder */
+    color: #ffffff; /* Brighter placeholder */
+    opacity: 0.85;
   }
 
   .input:focus {
@@ -112,7 +127,7 @@ const StyledWrapper = styled.div`
 
   .white {
     max-height: 63px;
-    max-width: 307px;
+    max-width: 100%;
     border-radius: 10px;
     filter: blur(2px);
   }
@@ -143,8 +158,8 @@ const StyledWrapper = styled.div`
 
   .border {
     max-height: 59px;
-    max-width: 303px;
-    border-radius: 11px;
+    max-width: 100%;
+    border-radius: 10px;
     filter: blur(0.5px);
   }
 
@@ -174,7 +189,8 @@ const StyledWrapper = styled.div`
 
   .darkBorderBg {
     max-height: 65px;
-    max-width: 312px;
+    max-width: 100%;
+    border-radius: 10px;
   }
 
   .darkBorderBg::before {
@@ -229,7 +245,7 @@ const StyledWrapper = styled.div`
     filter: blur(30px);
     opacity: 0.4;
     max-height: 130px;
-    max-width: 354px;
+    max-width: 100%;
   }
 
   .glow::before {
@@ -260,12 +276,17 @@ const StyledWrapper = styled.div`
   #main {
     position: relative;
     font-family: "Inter", sans-serif;
+    width: 100%;
+    height: 56px; /* match input height */
+    display: flex;
+    align-items: center;
   }
 
   #search-icon {
     position: absolute;
     left: 20px;
-    top: 15px;
+    top: 50%;
+    transform: translateY(-50%);
     color: #9945FF;
   }
 
