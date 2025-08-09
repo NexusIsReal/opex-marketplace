@@ -6,6 +6,7 @@ import BlurText from "@/components/BlurText";
 import ShinyText from "@/components/ShinyText";
 import TrueFocus from "@/components/TrueFocus";
 import DarkVeil from "@/components/DarkVeil";
+import GlowCard from "@/components/GlowCard";
 export default function Home() {
   const handleAnimationComplete = () => {
     console.log("Animation complete");
@@ -105,56 +106,84 @@ export default function Home() {
           </FadeIn>
           
           <FadeIn delay={0.4} duration={0.8} direction="up">
-            <div className="bg-[#151515] rounded-lg p-6 shadow-lg border border-[#222] backdrop-blur-sm">
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 text-center">
-                {[
-                  { 
-                    icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>,
-                    name: "Popular" 
-                  },
-                  { 
-                    icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>,
-                    name: "Illustration" 
-                  },
-                  { 
-                    icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>,
-                    name: "UI/UX Design" 
-                  },
-                  { 
-                    icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>,
-                    name: "Web Dev" 
-                  },
-                  { 
-                    icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>,
-                    name: "Marketing" 
-                  },
-                  { 
-                    icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>,
-                    name: "Content" 
-                  },
-                  { 
-                    icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>,
-                    name: "Video" 
-                  },
-                  { 
-                    icon: <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>,
-                    name: "Product Design" 
-                  }
-                ].map((category, index) => (
-                  <div 
-                    key={index} 
-                    className="p-3 flex flex-col items-center justify-center hover:bg-[#1a1a1a] transition-all duration-300 rounded-lg cursor-pointer group"
-                  >
-                    <div className="mb-3 text-[#9945FF] group-hover:text-[#B975FF] transform group-hover:scale-110 transition-all duration-300">
-                      {category.icon}
-                    </div>
-                    <div className="text-sm font-medium text-[#ccc] group-hover:text-white transition-colors duration-300">
-                      {category.name}
-                    </div>
+            <GlowCard className="p-0 overflow-hidden" glowIntensity="0" glowSize="600px" enableTilt={false}>
+              <div className="bg-[#151515] rounded-lg p-6 shadow-lg backdrop-blur-sm">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                <div className="bg-[#060010] rounded-xl p-4 aspect-square flex flex-col items-center justify-center transition-all duration-300 hover:-translate-y-1 group">
+                  <div className="text-[#9945FF] mb-3 transform group-hover:scale-110 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                      <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                      <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                    </svg>
                   </div>
-                ))}
-              </div>
+                  <h3 className="text-white text-center font-medium">Design</h3>
+                  <p className="text-xs text-[#999] text-center mt-1">UI/UX design services</p>
+                </div>
+                
+                <div className="bg-[#060010] rounded-xl p-4 aspect-square flex flex-col items-center justify-center transition-all duration-300 hover:-translate-y-1 group">
+                  <div className="text-[#9945FF] mb-3 transform group-hover:scale-110 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="16 18 22 12 16 6"></polyline>
+                      <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                  </div>
+                  <h3 className="text-white text-center font-medium">Development</h3>
+                  <p className="text-xs text-[#999] text-center mt-1">Web & mobile development</p>
+                </div>
+                
+                <div className="bg-[#060010] rounded-xl p-4 aspect-square flex flex-col items-center justify-center transition-all duration-300 hover:-translate-y-1 group">
+                  <div className="text-[#9945FF] mb-3 transform group-hover:scale-110 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 20V10"></path>
+                      <path d="M18 20V4"></path>
+                      <path d="M6 20v-4"></path>
+                    </svg>
+                  </div>
+                  <h3 className="text-white text-center font-medium">Marketing</h3>
+                  <p className="text-xs text-[#999] text-center mt-1">Digital marketing solutions</p>
+                </div>
+                
+                <div className="bg-[#060010] rounded-xl p-4 aspect-square flex flex-col items-center justify-center transition-all duration-300 hover:-translate-y-1 group">
+                  <div className="text-[#9945FF] mb-3 transform group-hover:scale-110 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                      <path d="M2 2l7.586 7.586"></path>
+                      <circle cx="11" cy="11" r="2"></circle>
+                    </svg>
+                  </div>
+                  <h3 className="text-white text-center font-medium">Writing</h3>
+                  <p className="text-xs text-[#999] text-center mt-1">Content writing services</p>
+                </div>
+                
+                <div className="bg-[#060010] rounded-xl p-4 aspect-square flex flex-col items-center justify-center transition-all duration-300 hover:-translate-y-1 group">
+                  <div className="text-[#9945FF] mb-3 transform group-hover:scale-110 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                      <line x1="12" y1="19" x2="12" y2="23"></line>
+                      <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                  </div>
+                  <h3 className="text-white text-center font-medium">Audio</h3>
+                  <p className="text-xs text-[#999] text-center mt-1">Voice & audio production</p>
+                </div>
+                
+                <div className="bg-[#060010] rounded-xl p-4 aspect-square flex flex-col items-center justify-center transition-all duration-300 hover:-translate-y-1 group">
+                  <div className="text-[#9945FF] mb-3 transform group-hover:scale-110 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                    </svg>
+                  </div>
+                  <h3 className="text-white text-center font-medium">Video</h3>
+                  <p className="text-xs text-[#999] text-center mt-1">Video production</p>
+                </div>
+              </div>  
             </div>
+            </GlowCard>
           </FadeIn>
           
           <div className="w-full flex justify-center items-center my-6">
