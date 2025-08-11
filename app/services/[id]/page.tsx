@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState } from "react";
+import { use } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Star, Clock, Check, MessageCircle, Heart, Share2, ShoppingCart, Shield, Award, Zap } from "lucide-react";
 import FadeIn from "@/components/FadeIn";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 
 // Mock data for services (same as in services/page.tsx)
 const SERVICES = [
@@ -322,7 +324,7 @@ const SERVICES = [
 ];
 
 export default function ServiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  // Await the params Promise before accessing properties
+  // Use the `use()` hook to unwrap the Promise
   const { id } = use(params);
   const serviceId = parseInt(id);
   const service = SERVICES.find(s => s.id === serviceId) || SERVICES[0]; // Fallback to first service if not found
@@ -369,9 +371,11 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
                 {/* Service Image */}
                 <div className="aspect-video relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-40 z-10" />
-                  <img 
+                  <Image 
                     src={service.image} 
                     alt={service.title}
+                    width={800}
+                    height={450}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-4 right-4 z-20">

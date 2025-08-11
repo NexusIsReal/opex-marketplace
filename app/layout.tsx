@@ -4,8 +4,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import "./fonts.css";
 import AppShell from "@/components/AppShell";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,11 +35,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} ${argoBold.variable} antialiased min-h-screen`}>
         <AppShell>
-          <div className="flex min-h-screen flex-col">
-            <Header fixed />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          {children}
         </AppShell>
       </body>
     </html>
