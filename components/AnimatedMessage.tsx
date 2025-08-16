@@ -1,7 +1,13 @@
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
-import { CheckCheck, Circle } from 'lucide-react';
+import { CheckCheck, Circle, FileText, Image, Paperclip, File } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+interface Attachment {
+  name: string;
+  type: string;
+  url: string;
+}
 
 interface AnimatedMessageProps {
   content: string;
@@ -9,6 +15,7 @@ interface AnimatedMessageProps {
   isOutgoing: boolean;
   isRead: boolean;
   isNew?: boolean;
+  attachments?: Attachment[];
 }
 
 export default function AnimatedMessage({ 
@@ -16,7 +23,8 @@ export default function AnimatedMessage({
   timestamp, 
   isOutgoing, 
   isRead,
-  isNew = false
+  isNew = false,
+  attachments = []
 }: AnimatedMessageProps) {
   // Use the isOutgoing prop to determine message position
   // Animation variants
@@ -67,8 +75,50 @@ export default function AnimatedMessage({
         variants={bubbleVariants}
         whileHover={{ scale: 1.02 }}
       >
-        <p className="text-sm md:text-base">{content}</p>
+        {content && <p className="text-sm md:text-base">{content}</p>}
+        
+        {/* Display attachments if present */}
+        {attachments && attachments.length > 0 && (
+          <div className="mt-2 space-y-2">
+            {attachments.map((attachment, index) => {
+              // Determine icon based on file type
+              let FileIcon = File;
+              if (attachment.type.startsWith('image/')) {
+                FileIcon = Image;
+              } else if (attachment.type.includes('pdf') || attachment.type.includes('document')) {
+                FileIcon = FileText;
+              }
+              
+              return (
+                <motion.div 
+                  key={`${attachment.name}-${index}`}
+                  className="flex items-center gap-2 p-2 rounded-md bg-black bg-opacity-20 hover:bg-opacity-30 transition-all"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <FileIcon className="h-4 w-4 flex-shrink-0" />
+                  <a 
+                    href={attachment.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-xs truncate flex-1 hover:underline"
+                  >
+                    {attachment.name}
+                  </a>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+        
         <div className="flex items-center justify-end gap-1 text-xs opacity-70 mt-1">
+          {attachments && attachments.length > 0 && (
+            <span className="flex items-center gap-1">
+              <Paperclip className="h-3 w-3" />{attachments.length}
+            </span>
+          )}
           <span>{timestamp}</span>
           {isOutgoing && (
             <motion.div

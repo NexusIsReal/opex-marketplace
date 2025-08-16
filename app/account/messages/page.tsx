@@ -220,8 +220,8 @@ export default function MessagesPage() {
   };
 
   // Send a message
-  const sendMessage = async () => {
-    if (!selectedUser || !newMessage.trim()) return;
+  const sendMessage = async (attachments?: File[]) => {
+    if (!selectedUser || (!newMessage.trim() && !attachments?.length)) return;
     
     try {
       const messageContent = newMessage.trim();
@@ -231,24 +231,50 @@ export default function MessagesPage() {
       // setIsTyping(true);
       
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          content: messageContent,
-          receiverId: selectedUser.id
-        }),
-      });
       
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      // If we have attachments, use FormData instead of JSON
+      if (attachments && attachments.length > 0) {
+        const formData = new FormData();
+        formData.append('content', messageContent);
+        formData.append('receiverId', selectedUser.id);
+        
+        // Append each file to the form data
+        attachments.forEach((file, index) => {
+          formData.append(`attachment${index}`, file);
+        });
+        
+        const response = await fetch('/api/messages', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+      } else {
+        // Regular JSON message without attachments
+        const response = await fetch('/api/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            content: messageContent,
+            receiverId: selectedUser.id
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        setMessages([...messages, data.message]);
       }
-      
-      const data = await response.json();
-      setMessages([...messages, data.message]);
       
       // Update conversations list to show the new message
       fetchConversations();
@@ -372,7 +398,7 @@ export default function MessagesPage() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="bg-gray-900 border-gray-700 md:col-span-1 overflow-hidden">
+          <Card className="bg-gray-900 border-gray-800 flex flex-col overflow-hidden shadow-lg" style={{ height: 'calc(100vh - 12rem)' }}>
             <CardHeader className="bg-gradient-to-r from-gray-900 to-gray-800">
               <CardTitle className="text-xl text-white flex items-center">
                 <motion.div
@@ -472,7 +498,7 @@ export default function MessagesPage() {
               )}
             </CardHeader>
             
-            <CardContent className="p-0 flex flex-col h-[500px]">
+            <CardContent className="p-0 flex flex-col overflow-hidden" style={{ height: 'calc(100vh - 16rem)' }}>
               {!selectedUser ? (
                 <motion.div
                   className="flex-1 flex items-center justify-center"
@@ -498,20 +524,23 @@ export default function MessagesPage() {
                   </div>
                 </motion.div>
               ) : (
-                <motion.div className="flex flex-col h-full w-full">
+                <motion.div className="flex flex-col w-full overflow-hidden" style={{ height: '100%' }}>
                   <AnimatedMessageList
                     messages={messages}
-                    currentUserId={currentUser?.id || ''}
+                    currentUserId={currentUser?.id || ''} // For account page, currentUser's messages should be on right
                     formatTimestamp={formatTimestamp}
                     isTyping={isTyping}
+                    isAdminInterface={false}
                   />
                   
-                  <AnimatedMessageInput
-                    value={newMessage}
-                    onChange={setNewMessage}
-                    onSend={sendMessage}
-                    disabled={isTyping}
-                  />
+                  <div className="mt-auto">
+                    <AnimatedMessageInput
+                      value={newMessage}
+                      onChange={setNewMessage}
+                      onSend={sendMessage}
+                      disabled={isTyping}
+                    />
+                  </div>
                 </motion.div>
               )}
             </CardContent>

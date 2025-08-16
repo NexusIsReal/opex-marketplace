@@ -57,6 +57,7 @@ model Message {
   receiverId    String
   read          Boolean  @default(false)
   applicationId String?
+  attachments   String?  @db.LongText
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   receiver      User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)

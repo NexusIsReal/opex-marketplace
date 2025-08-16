@@ -413,8 +413,8 @@ function AdminMessagesPage() {
   };
 
   // Send a new message
-  const sendMessage = async () => {
-    if (!selectedUser || !newMessage.trim()) return;
+  const sendMessage = async (attachments?: File[]) => {
+    if (!selectedUser || (!newMessage.trim() && !attachments?.length)) return;
     
     try {
       const token = localStorage.getItem('token');
@@ -432,7 +432,8 @@ function AdminMessagesPage() {
         read: true,
         sender: currentUser,
         receiver: selectedUser,
-        applicationId: null
+        applicationId: null,
+        hasAttachments: attachments && attachments.length > 0
       };
       
       // Optimistically add the message
@@ -442,39 +443,79 @@ function AdminMessagesPage() {
       let success = false;
       let messageData = null;
       
-      try {
-        // Try the admin endpoint first
-        const response = await fetch('/api/admin/messages', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            content: newMessageContent,
-            receiverId: selectedUser.id,
-            applicationId: null
-          })
-        });
+      // If we have attachments, use FormData instead of JSON
+      if (attachments && attachments.length > 0) {
+        // Try admin endpoint first with attachments
+        try {
+          const formData = new FormData();
+          formData.append('content', newMessageContent);
+          formData.append('receiverId', selectedUser.id);
+          formData.append('applicationId', 'null');
+          
+          // Append each file to the form data
+          attachments.forEach((file, index) => {
+            formData.append(`attachment${index}`, file);
+          });
+          
+          const response = await fetch('/api/admin/messages', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            body: formData
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            messageData = data;
+            success = true;
+          } else {
+            console.log("Admin endpoint returned status:", response.status);
+            const errorText = await response.text();
+            console.log("Admin endpoint error:", errorText);
+          }
+        } catch (adminErr) {
+          console.log("Admin send message with attachments failed:", adminErr);
+        }
         
-        if (response.ok) {
-          const data = await response.json();
-          messageData = data;
-          success = true;
-          console.log('Messages from admin endpoint:', data);
-          // Debug the first message to see structure
-          if (data && data.message) {
-            console.log('First message structure:', JSON.stringify(data.message, null, 2));
+        // If admin endpoint didn't work, try regular endpoint with FormData
+        if (!success) {
+          try {
+            const formData = new FormData();
+            formData.append('content', newMessageContent);
+            formData.append('receiverId', selectedUser.id);
+            
+            // Append each file to the form data
+            attachments.forEach((file, index) => {
+              formData.append(`attachment${index}`, file);
+            });
+            
+            const regularResponse = await fetch('/api/messages', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`
+              },
+              body: formData
+            });
+            
+            if (regularResponse.ok) {
+              const regularData = await regularResponse.json();
+              messageData = regularData;
+              success = true;
+            } else {
+              console.log("Regular endpoint returned status:", regularResponse.status);
+              const errorText = await regularResponse.text();
+              console.log("Regular endpoint error:", errorText);
+            }
+          } catch (regularErr) {
+            console.log("Regular send message with attachments failed:", regularErr);
           }
         }
-      } catch (adminErr) {
-        console.log("Admin send message endpoint failed:", adminErr);
-      }
-      
-      // If admin endpoint didn't work, try regular endpoint
-      if (!success) {
+      } else {
+        // No attachments, use JSON
         try {
-          const regularResponse = await fetch('/api/messages', {
+          // Try the admin endpoint first
+          const response = await fetch('/api/admin/messages', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -487,13 +528,52 @@ function AdminMessagesPage() {
             })
           });
           
-          if (regularResponse.ok) {
-            const regularData = await regularResponse.json();
-            messageData = regularData;
+          if (response.ok) {
+            const data = await response.json();
+            messageData = data;
             success = true;
+            console.log('Messages from admin endpoint:', data);
+            // Debug the first message to see structure
+            if (data && data.message) {
+              console.log('First message structure:', JSON.stringify(data.message, null, 2));
+            }
+          } else {
+            console.log("Admin endpoint returned status:", response.status);
+            const errorText = await response.text();
+            console.log("Admin endpoint error:", errorText);
           }
-        } catch (regularErr) {
-          console.log("Regular send message endpoint failed:", regularErr);
+        } catch (adminErr) {
+          console.log("Admin send message endpoint failed:", adminErr);
+        }
+        
+        // If admin endpoint didn't work, try regular endpoint
+        if (!success) {
+          try {
+            const regularResponse = await fetch('/api/messages', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                content: newMessageContent,
+                receiverId: selectedUser.id,
+                applicationId: null
+              })
+            });
+            
+            if (regularResponse.ok) {
+              const regularData = await regularResponse.json();
+              messageData = regularData;
+              success = true;
+            } else {
+              console.log("Regular endpoint returned status:", regularResponse.status);
+              const errorText = await regularResponse.text();
+              console.log("Regular endpoint error:", errorText);
+            }
+          } catch (regularErr) {
+            console.log("Regular send message endpoint failed:", regularErr);
+          }
         }
       }
       
@@ -504,13 +584,22 @@ function AdminMessagesPage() {
         ));
         
         // Mark messages as read after sending a message
-        markMessagesAsRead(selectedUser.id);
+        if (selectedUser) {
+          markMessagesAsRead(selectedUser.id);
+        }
         
-        // Update conversations list to show the latest message
+        // Update conversations list
         fetchConversations();
-      } else {
+      } else if (!success) {
         // If both endpoints failed but we didn't throw an error yet
-        throw new Error("Both send message endpoints failed");
+        console.error("Both send message endpoints failed");
+        toast({
+          title: "Error",
+          description: "Failed to send message. Please try again.",
+          variant: "destructive"
+        });
+        // Remove the temporary message on error
+        setMessages(prev => prev.filter(msg => !msg.id.startsWith('temp-')));
       }
     } catch (err) {
       console.error("Failed to send message:", err);
@@ -582,11 +671,12 @@ function AdminMessagesPage() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          <Card className="bg-gray-900 border-gray-800 h-full flex flex-col overflow-hidden">
-            <CardContent className="p-0 flex-1 flex flex-col h-full">
+          <Card className="bg-gray-900 border-gray-800 flex flex-col overflow-hidden shadow-lg" style={{ height: 'calc(100vh - 12rem)' }}>
+            <CardContent className="p-0 flex-1 flex flex-col overflow-hidden" style={{ height: 'calc(100vh - 16rem)' }}>
               {selectedUser ? (
                 <motion.div 
-                  className="flex flex-col h-full"
+                  className="flex flex-col overflow-hidden"
+                  style={{ height: '100%' }}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
@@ -608,18 +698,21 @@ function AdminMessagesPage() {
                   ) : (
                     <AnimatedMessageList
                       messages={messages}
-                      currentUserId={selectedUser?.id} // Use selectedUser ID instead of currentUser ID
+                      currentUserId={currentUser?.id || 'admin-default'}
                       formatTimestamp={formatTimestamp}
                       isTyping={isTyping}
+                      isAdminInterface={true}
                     />
                   )}
                   
-                  <AnimatedMessageInput
-                    value={newMessage}
-                    onChange={setNewMessage}
-                    onSend={sendMessage}
-                    disabled={isTyping}
-                  />
+                  <div className="mt-auto">
+                    <AnimatedMessageInput
+                      value={newMessage}
+                      onChange={setNewMessage}
+                      onSend={sendMessage}
+                      disabled={isTyping}
+                    />
+                  </div>
                 </motion.div>
               ) : (
                 <div className="flex justify-center items-center h-full">
