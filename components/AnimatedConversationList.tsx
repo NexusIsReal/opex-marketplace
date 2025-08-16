@@ -46,7 +46,7 @@ export default function AnimatedConversationList({
       opacity: 1,
       transition: {
         staggerChildren: 0.1
-      }
+      } as any
     }
   };
 
@@ -60,7 +60,7 @@ export default function AnimatedConversationList({
         type: "spring",
         stiffness: 300,
         damping: 24
-      }
+      } as any
     }
   };
 
@@ -73,7 +73,7 @@ export default function AnimatedConversationList({
         type: "spring",
         stiffness: 500,
         damping: 15
-      }
+      } as any
     }
   };
 
