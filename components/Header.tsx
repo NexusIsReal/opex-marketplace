@@ -1,10 +1,14 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { MessageSquare, UserPlus } from 'lucide-react';
+import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Professional Glass Effect Header Component
 export default function Header({ fixed = true }: { fixed?: boolean }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -107,39 +111,83 @@ export default function Header({ fixed = true }: { fixed?: boolean }) {
 
           {/* Enhanced Auth Section - Hidden on mobile */}
           <div className="hidden lg:flex items-center space-x-6 relative z-10">
-            {/* Login Button */}
-            <a 
-              href="#" 
-              className="group text-sm font-semibold text-gray-300 hover:text-gray-100 transition-all duration-400 px-6 py-3 rounded-xl hover:backdrop-blur-sm hover:bg-gray-800/[0.3] border border-transparent hover:border-gray-400/[0.15] hover:shadow-lg relative overflow-hidden"
-            >
-              <span className="relative z-10">Login</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-700/[0.1] to-gray-600/[0.1] opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
-            </a>
-            
-            {/* Enhanced Sign Up Button with premium glass effect */}
-            <div className="relative group">
-              {/* Animated background glow */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-gray-400 via-gray-300 to-gray-500 rounded-2xl blur-sm opacity-25 group-hover:opacity-50 transition-all duration-500 animate-pulse"></div>
-              
-              <a 
-                href="#" 
-                className="relative px-8 py-3.5 rounded-2xl bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 backdrop-blur-xl text-white text-sm font-bold border border-gray-400/30 hover:border-gray-300/40 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-gray-500/20 hover:scale-105 active:scale-95 overflow-hidden"
-              >
-                {/* Inner glass reflection */}
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-300/20 via-transparent to-transparent opacity-60"></div>
+            {user ? (
+              <div className="flex items-center space-x-4">
+                {/* Become Freelancer Link */}
+                <Link 
+                  href="/account/become-freelancer" 
+                  className="group text-sm font-semibold text-gray-300 hover:text-gray-100 transition-all duration-400 px-4 py-3 rounded-xl hover:backdrop-blur-sm hover:bg-gray-800/[0.3] border border-transparent hover:border-gray-400/[0.15] hover:shadow-lg relative overflow-hidden flex items-center gap-2"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  <span className="relative z-10">Become Freelancer</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-700/[0.1] to-gray-600/[0.1] opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+                </Link>
                 
-                {/* Button text */}
-                <span className="relative z-10 bg-gradient-to-r from-gray-100 to-white bg-clip-text text-transparent">
-                  Sign Up Free
-                </span>
+                {/* Messages Link */}
+                <Link 
+                  href="/account/messages" 
+                  className="group text-sm font-semibold text-gray-300 hover:text-gray-100 transition-all duration-400 px-4 py-3 rounded-xl hover:backdrop-blur-sm hover:bg-gray-800/[0.3] border border-transparent hover:border-gray-400/[0.15] hover:shadow-lg relative overflow-hidden flex items-center gap-2"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  <span className="relative z-10">Messages</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-700/[0.1] to-gray-600/[0.1] opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+                </Link>
                 
-                {/* Hover effect overlay */}
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-500/20 via-gray-400/20 to-gray-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+                {/* Account Link */}
+                <Link 
+                  href="/account" 
+                  className="group text-sm font-semibold text-gray-300 hover:text-gray-100 transition-all duration-400 px-4 py-3 rounded-xl hover:backdrop-blur-sm hover:bg-gray-800/[0.3] border border-transparent hover:border-gray-400/[0.15] hover:shadow-lg relative overflow-hidden"
+                >
+                  <span className="relative z-10">My Account</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-700/[0.1] to-gray-600/[0.1] opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+                </Link>
                 
-                {/* Shimmer effect */}
-                <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-gray-200/15 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-pulse"></div>
-              </a>
-            </div>
+                {/* Logout Button */}
+                <button 
+                  onClick={logout}
+                  className="group text-sm font-semibold text-red-300 hover:text-red-100 transition-all duration-400 px-6 py-3 rounded-xl hover:backdrop-blur-sm hover:bg-red-800/[0.3] border border-transparent hover:border-red-400/[0.15] hover:shadow-lg relative overflow-hidden"
+                >
+                  <span className="relative z-10">Logout</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-700/[0.1] to-red-600/[0.1] opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* Login Button */}
+                <Link 
+                  href="/auth/login" 
+                  className="group text-sm font-semibold text-gray-300 hover:text-gray-100 transition-all duration-400 px-6 py-3 rounded-xl hover:backdrop-blur-sm hover:bg-gray-800/[0.3] border border-transparent hover:border-gray-400/[0.15] hover:shadow-lg relative overflow-hidden"
+                >
+                  <span className="relative z-10">Login</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-700/[0.1] to-gray-600/[0.1] opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+                </Link>
+                
+                {/* Enhanced Sign Up Button with premium glass effect */}
+                <div className="relative group">
+                  {/* Animated background glow */}
+                  <div className="absolute -inset-1 bg-gradient-to-r from-gray-400 via-gray-300 to-gray-500 rounded-2xl blur-sm opacity-25 group-hover:opacity-50 transition-all duration-500 animate-pulse"></div>
+                  
+                  <Link 
+                    href="/auth/register" 
+                    className="relative px-8 py-3.5 rounded-2xl bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 backdrop-blur-xl text-white text-sm font-bold border border-gray-400/30 hover:border-gray-300/40 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-gray-500/20 hover:scale-105 active:scale-95 overflow-hidden"
+                  >
+                    {/* Inner glass reflection */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-300/20 via-transparent to-transparent opacity-60"></div>
+                    
+                    {/* Button text */}
+                    <span className="relative z-10 bg-gradient-to-r from-gray-100 to-white bg-clip-text text-transparent">
+                      Sign Up Free
+                    </span>
+                    
+                    {/* Hover effect overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-gray-500/20 via-gray-400/20 to-gray-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+                    
+                    {/* Shimmer effect */}
+                    <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-gray-200/15 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-pulse"></div>
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -189,20 +237,60 @@ export default function Header({ fixed = true }: { fixed?: boolean }) {
             ))}
             
             <div className="pt-3 sm:pt-4 border-t border-gray-500/[0.15] flex flex-col space-y-2 sm:space-y-3">
-              {/* Login and Sign Up buttons for mobile */}
-              <a 
-                href="#" 
-                className="text-sm font-semibold text-gray-300 hover:text-gray-100 transition-all duration-400 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl hover:backdrop-blur-sm hover:bg-gray-800/[0.3] border border-transparent hover:border-gray-400/[0.15] hover:shadow-lg"
-              >
-                Login
-              </a>
-              <a 
-                href="#" 
-                className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 backdrop-blur-xl text-white text-sm font-bold text-center border border-gray-400/25 shadow-lg relative overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-300/20 via-transparent to-transparent opacity-60"></div>
-                <span className="relative z-10 bg-gradient-to-r from-gray-100 to-white bg-clip-text text-transparent">Sign Up Free</span>
-              </a>
+              {user ? (
+                <>
+                  {/* Become Freelancer Link */}
+                  <Link 
+                    href="/account/become-freelancer" 
+                    className="text-sm font-semibold text-gray-300 hover:text-gray-100 transition-all duration-400 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl hover:backdrop-blur-sm hover:bg-gray-800/[0.3] border border-transparent hover:border-gray-400/[0.15] hover:shadow-lg flex items-center gap-2"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    Become Freelancer
+                  </Link>
+                  
+                  {/* Messages Link */}
+                  <Link 
+                    href="/account/messages" 
+                    className="text-sm font-semibold text-gray-300 hover:text-gray-100 transition-all duration-400 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl hover:backdrop-blur-sm hover:bg-gray-800/[0.3] border border-transparent hover:border-gray-400/[0.15] hover:shadow-lg flex items-center gap-2"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    Messages
+                  </Link>
+                  
+                  {/* Account Link */}
+                  <Link 
+                    href="/account" 
+                    className="text-sm font-semibold text-gray-300 hover:text-gray-100 transition-all duration-400 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl hover:backdrop-blur-sm hover:bg-gray-800/[0.3] border border-transparent hover:border-gray-400/[0.15] hover:shadow-lg"
+                  >
+                    My Account
+                  </Link>
+                  
+                  {/* Logout Button */}
+                  <button 
+                    onClick={logout}
+                    className="text-sm font-semibold text-red-300 hover:text-red-100 transition-all duration-400 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl hover:backdrop-blur-sm hover:bg-red-800/[0.3] border border-transparent hover:border-red-400/[0.15] hover:shadow-lg"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Login and Sign Up buttons for mobile */}
+                  <Link 
+                    href="/auth/login" 
+                    className="text-sm font-semibold text-gray-300 hover:text-gray-100 transition-all duration-400 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl hover:backdrop-blur-sm hover:bg-gray-800/[0.3] border border-transparent hover:border-gray-400/[0.15] hover:shadow-lg"
+                  >
+                    Login
+                  </Link>
+                  <Link 
+                    href="/auth/register" 
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 backdrop-blur-xl text-white text-sm font-bold text-center border border-gray-400/25 shadow-lg relative overflow-hidden group"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-300/20 via-transparent to-transparent opacity-60"></div>
+                    <span className="relative z-10 bg-gradient-to-r from-gray-100 to-white bg-clip-text text-transparent">Sign Up Free</span>
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>

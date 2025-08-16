@@ -23,7 +23,7 @@ import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 
 const loginSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address' }),
+  usernameOrEmail: z.string().min(1, { message: 'Username or email is required' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
 });
 
@@ -49,19 +49,40 @@ export default function LoginPage() {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
+      usernameOrEmail: '',
       password: '',
     },
   });
 
-  function onSubmit(values: z.infer<typeof loginSchema>) {
+  async function onSubmit(values: z.infer<typeof loginSchema>) {
     setIsLoading(true);
-    // Simulate login - replace with actual authentication
-    setTimeout(() => {
-      console.log(values);
-      setIsLoading(false);
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+      
+      // Login successful - store token in localStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      console.log('Login successful:', data);
       router.push('/');
-    }, 1500);
+    } catch (error) {
+      console.error('Login error:', error);
+      // Handle error (you could add a toast notification here)
+    } finally {
+      setIsLoading(false);
+    }
   }
   
   // No extra page animations; keep it calm and professional
@@ -81,20 +102,19 @@ export default function LoginPage() {
               <motion.div variants={item}>
               <FormField
                 control={form.control}
-                name="email"
+                name="usernameOrEmail"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium text-white">Email</FormLabel>
+                    <FormLabel className="text-sm font-medium text-white">Username or Email</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
-                          placeholder="you@example.com"
+                          placeholder="username or email"
                           {...field}
                           className="bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
                         />
                       </div>
                     </FormControl>
-                    <p className="text-xs text-white/40">Use your work email if applicable.</p>
                     <FormMessage className="text-red-400 font-mono text-xs" />
                   </FormItem>
                 )}

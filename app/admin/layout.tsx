@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { 
   LayoutDashboard, 
   Users, 
@@ -13,14 +13,15 @@ import {
   Menu,
   X
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { withAdminProtection } from "@/lib/adminAuthClient";
 
-export default function AdminLayout({
-  children,
-}: {
+interface AdminLayoutProps {
   children: React.ReactNode;
-}) {
+}
+
+function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -114,7 +115,13 @@ export default function AdminLayout({
 
           {/* Logout button */}
           <div className="p-4 border-t border-gray-800">
-            <button className="flex items-center px-4 py-3 w-full rounded-lg text-gray-400 hover:bg-gray-800 transition-colors">
+            <button 
+              onClick={() => {
+                localStorage.removeItem('token');
+                window.location.href = '/auth/login';
+              }}
+              className="flex items-center px-4 py-3 w-full rounded-lg text-gray-400 hover:bg-gray-800 transition-colors"
+            >
               <LogOut className="w-5 h-5" />
               <span className="ml-3">Logout</span>
             </button>
@@ -132,3 +139,5 @@ export default function AdminLayout({
     </div>
   );
 }
+
+export default withAdminProtection(AdminLayout);

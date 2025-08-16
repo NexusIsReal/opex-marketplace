@@ -23,6 +23,7 @@ import type { Variants } from 'framer-motion';
 
 const registerSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
+  username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
   email: z.string().email({ message: 'Invalid email address' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
   confirmPassword: z.string(),
@@ -55,20 +56,44 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: '',
+      username: '',
       email: '',
       password: '',
       confirmPassword: '',
     },
   });
 
-  function onSubmit(values: z.infer<typeof registerSchema>) {
+  async function onSubmit(values: z.infer<typeof registerSchema>) {
     setIsLoading(true);
-    // Simulate registration - replace with actual registration logic
-    setTimeout(() => {
-      console.log(values);
-      setIsLoading(false);
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: values.username,
+          email: values.email,
+          password: values.password,
+          fullName: values.name,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+      
+      // Registration successful
+      console.log('Registration successful:', data);
       router.push('/auth/login');
-    }, 1500);
+    } catch (error) {
+      console.error('Registration error:', error);
+      // Handle error (you could add a toast notification here)
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -94,6 +119,27 @@ export default function RegisterPage() {
                       <div className="relative">
                         <Input
                           placeholder="Your name"
+                          {...field}
+                          className="bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-red-400 font-mono text-xs" />
+                  </FormItem>
+                )}
+              />
+              </motion.div>
+              <motion.div variants={item}>
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium text-white">Username</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          placeholder="username"
                           {...field}
                           className="bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
                         />
