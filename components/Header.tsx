@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, UserPlus } from 'lucide-react';
+import { MessageSquare, UserPlus, Bell } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function Header({ fixed = true }: { fixed?: boolean }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const { user, logout } = useAuth();
 
   useEffect(() => {
@@ -20,6 +21,38 @@ export default function Header({ fixed = true }: { fixed?: boolean }) {
       return () => window.removeEventListener('scroll', handleScroll);
     }
   }, [fixed]);
+  
+  // Fetch unread message count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      if (!user) return;
+      
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        
+        const response = await fetch('/api/messages/unread', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setUnreadCount(data.unreadCount);
+        }
+      } catch (error) {
+        console.error('Error fetching unread count:', error);
+      }
+    };
+    
+    fetchUnreadCount();
+    
+    // Poll for new messages every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
+    
+    return () => clearInterval(interval);
+  }, [user]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -123,12 +156,23 @@ export default function Header({ fixed = true }: { fixed?: boolean }) {
                   <div className="absolute inset-0 bg-gradient-to-r from-gray-700/[0.1] to-gray-600/[0.1] opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
                 </Link>
                 
-                {/* Messages Link */}
+                {/* Messages Link with Notification */}
                 <Link 
                   href="/account/messages" 
                   className="group text-sm font-semibold text-gray-300 hover:text-gray-100 transition-all duration-400 px-4 py-3 rounded-xl hover:backdrop-blur-sm hover:bg-gray-800/[0.3] border border-transparent hover:border-gray-400/[0.15] hover:shadow-lg relative overflow-hidden flex items-center gap-2"
                 >
-                  <MessageSquare className="h-4 w-4" />
+                  <div className="relative">
+                    <MessageSquare className="h-4 w-4" />
+                    {unreadCount > 0 && (
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                        {unreadCount > 9 ? (
+                          <span className="text-[8px] font-bold text-white">9+</span>
+                        ) : unreadCount > 0 ? (
+                          <span className="text-[8px] font-bold text-white">{unreadCount}</span>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
                   <span className="relative z-10">Messages</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-gray-700/[0.1] to-gray-600/[0.1] opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
                 </Link>
@@ -248,12 +292,23 @@ export default function Header({ fixed = true }: { fixed?: boolean }) {
                     Become Freelancer
                   </Link>
                   
-                  {/* Messages Link */}
+                  {/* Messages Link with Notification */}
                   <Link 
                     href="/account/messages" 
                     className="text-sm font-semibold text-gray-300 hover:text-gray-100 transition-all duration-400 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl hover:backdrop-blur-sm hover:bg-gray-800/[0.3] border border-transparent hover:border-gray-400/[0.15] hover:shadow-lg flex items-center gap-2"
                   >
-                    <MessageSquare className="h-4 w-4" />
+                    <div className="relative">
+                      <MessageSquare className="h-4 w-4" />
+                      {unreadCount > 0 && (
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                          {unreadCount > 9 ? (
+                            <span className="text-[8px] font-bold text-white">9+</span>
+                          ) : unreadCount > 0 ? (
+                            <span className="text-[8px] font-bold text-white">{unreadCount}</span>
+                          ) : null}
+                        </div>
+                      )}
+                    </div>
                     Messages
                   </Link>
                   

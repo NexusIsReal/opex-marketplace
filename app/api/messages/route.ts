@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
         const safeFileName = `${timestamp}-${fileName.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
         
         // Create URL for the file in the public/uploads directory
+        // Ensure the URL is properly formatted for both development and production
         const fileUrl = `/uploads/${safeFileName}`;
         
         // In a real implementation, you would use a proper file storage service

@@ -100,7 +100,7 @@ export default function AnimatedMessage({
                 >
                   <FileIcon className="h-4 w-4 flex-shrink-0" />
                   <a 
-                    href={attachment.url} 
+                    href={attachment.url.startsWith('/uploads/') ? `/api/serve-file?path=${encodeURIComponent(attachment.url)}` : attachment.url} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-xs truncate flex-1 hover:underline"

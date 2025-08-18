@@ -1,6 +1,25 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Ensure uploads directory is properly served in production
+  output: 'standalone',
+  
+  // Configure static file handling
+  async headers() {
+    return [
+      {
+        source: '/uploads/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400',
+          },
+        ],
+      },
+    ];
+  },
+  
+  // Configure images
   images: {
     // Allow rendering remote SVG avatars (e.g., Dicebear)
     dangerouslyAllowSVG: true,

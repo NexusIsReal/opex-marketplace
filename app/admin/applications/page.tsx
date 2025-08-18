@@ -437,7 +437,7 @@ export default function ApplicationsManagement() {
             <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-white focus:ring-[#9945FF]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700 text-white">
+            <SelectContent className="bg-gray-800 border-gray-700 text-white shadow-lg">
               <SelectItem value="All">All Status</SelectItem>
               <SelectItem value="PENDING">Pending</SelectItem>
               <SelectItem value="APPROVED">Approved</SelectItem>
@@ -453,42 +453,42 @@ export default function ApplicationsManagement() {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#9945FF]"></div>
         </div>
       ) : (
-        <div className="rounded-md border border-gray-700 overflow-hidden">
+        <div className="rounded-md border border-gray-600 overflow-hidden bg-gray-900 shadow-lg">
           <Table>
-            <TableHeader className="bg-gray-800">
+            <TableHeader className="bg-gray-800/90">
               <TableRow className="hover:bg-gray-800/50 border-gray-700">
-                <TableHead className="text-white">Applicant</TableHead>
-                <TableHead className="text-white">Category</TableHead>
-                <TableHead className="text-white">Experience</TableHead>
-                <TableHead className="text-white">Applied On</TableHead>
-                <TableHead className="text-white">Status</TableHead>
-                <TableHead className="text-white text-right">Actions</TableHead>
+                <TableHead className="text-gray-200">Applicant</TableHead>
+                <TableHead className="text-gray-200">Category</TableHead>
+                <TableHead className="text-gray-200">Experience</TableHead>
+                <TableHead className="text-gray-200">Applied On</TableHead>
+                <TableHead className="text-gray-200">Status</TableHead>
+                <TableHead className="text-gray-200 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="bg-gray-900">
+            <TableBody className="bg-gray-900/95">
               {filteredApplications.length === 0 ? (
-                <TableRow className="hover:bg-gray-800/50 border-gray-700">
-                  <TableCell colSpan={6} className="text-center text-gray-400 py-8">
+                <TableRow className="hover:bg-gray-800/70 border-gray-700">
+                  <TableCell colSpan={6} className="text-center text-gray-300 py-8">
                     No applications found
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredApplications.map((application) => (
-                  <TableRow key={application.id} className="hover:bg-gray-800/50 border-gray-700">
-                    <TableCell className="font-medium text-white">
+                  <TableRow key={application.id} className="hover:bg-gray-800/70 border-gray-700">
+                    <TableCell className="font-medium text-gray-200">
                       {application.user.fullName || application.user.username}
-                      <div className="text-sm text-gray-400">{application.user.email}</div>
+                      <div className="text-sm text-gray-300">{application.user.email}</div>
                     </TableCell>
-                    <TableCell className="text-white">{formatCategory(application.category)}</TableCell>
-                    <TableCell className="text-white">{application.experience} years</TableCell>
-                    <TableCell className="text-white">{new Date(application.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-gray-200">{formatCategory(application.category)}</TableCell>
+                    <TableCell className="text-gray-200">{application.experience} years</TableCell>
+                    <TableCell className="text-gray-200">{new Date(application.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>{getStatusBadge(application.status)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button 
                           variant="outline" 
                           size="sm"
-                          className="border-gray-700 text-white hover:bg-gray-800"
+                          className="border-gray-600 text-gray-200 hover:bg-gray-700"
                           onClick={() => openApplicationDetails(application)}
                         >
                           Details
@@ -496,7 +496,7 @@ export default function ApplicationsManagement() {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          className="border-gray-700 text-white hover:bg-gray-800"
+                          className="border-gray-600 text-gray-200 hover:bg-gray-700"
                           onClick={() => router.push(`/admin/messages?userId=${application.userId}`)}
                         >
                           Chat
@@ -514,16 +514,16 @@ export default function ApplicationsManagement() {
       {/* Application Details Dialog */}
       {selectedApplication && (
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <DialogContent className="bg-gray-900 text-white border-gray-700 max-w-3xl">
+          <DialogContent className="bg-gray-900 text-gray-200 border-gray-600 max-w-3xl shadow-xl">
             <DialogHeader>
               <DialogTitle className="text-2xl">Application Details</DialogTitle>
-              <DialogDescription className="text-gray-400">
+              <DialogDescription className="text-gray-300">
                 Review the freelancer application
               </DialogDescription>
             </DialogHeader>
             
             <Tabs defaultValue="details" className="w-full">
-              <TabsList className="bg-gray-800 border-gray-700">
+              <TabsList className="bg-gray-800 border-gray-600 text-gray-100">
                 <TabsTrigger value="details">Details</TabsTrigger>
                 <TabsTrigger value="skills">Skills & Experience</TabsTrigger>
                 <TabsTrigger value="notes">Admin Notes</TabsTrigger>
@@ -531,80 +531,80 @@ export default function ApplicationsManagement() {
               
               <TabsContent value="details" className="space-y-4 mt-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <Card className="bg-gray-800 border-gray-700">
+                  <Card className="bg-gray-800 border-gray-600 shadow-md">
                     <CardHeader>
-                      <CardTitle className="text-white">Applicant Information</CardTitle>
+                      <CardTitle className="text-gray-200">Applicant Information</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <div>
-                        <span className="text-gray-400">Name:</span>
-                        <span className="text-white ml-2">{selectedApplication.user.fullName || selectedApplication.user.username}</span>
+                        <span className="text-gray-300">Name:</span>
+                        <span className="text-gray-200 ml-2">{selectedApplication.user.fullName || selectedApplication.user.username}</span>
                       </div>
                       <div>
-                        <span className="text-gray-400">Email:</span>
-                        <span className="text-white ml-2">{selectedApplication.user.email}</span>
+                        <span className="text-gray-300">Email:</span>
+                        <span className="text-gray-200 ml-2">{selectedApplication.user.email}</span>
                       </div>
                       <div>
-                        <span className="text-gray-400">Username:</span>
-                        <span className="text-white ml-2">{selectedApplication.user.username}</span>
+                        <span className="text-gray-300">Username:</span>
+                        <span className="text-gray-200 ml-2">{selectedApplication.user.username}</span>
                       </div>
                       <div>
-                        <span className="text-gray-400">Member Since:</span>
-                        <span className="text-white ml-2">{new Date(selectedApplication.user.createdAt).toLocaleDateString()}</span>
+                        <span className="text-gray-300">Member Since:</span>
+                        <span className="text-gray-200 ml-2">{new Date(selectedApplication.user.createdAt).toLocaleDateString()}</span>
                       </div>
                     </CardContent>
                   </Card>
                   
-                  <Card className="bg-gray-800 border-gray-700">
+                  <Card className="bg-gray-800 border-gray-600 shadow-md">
                     <CardHeader>
-                      <CardTitle className="text-white">Application Status</CardTitle>
+                      <CardTitle className="text-gray-200">Application Status</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <div>
-                        <span className="text-gray-400">Current Status:</span>
+                        <span className="text-gray-300">Current Status:</span>
                         <span className="ml-2">{getStatusBadge(selectedApplication.status)}</span>
                       </div>
                       <div>
-                        <span className="text-gray-400">Applied On:</span>
-                        <span className="text-white ml-2">{new Date(selectedApplication.createdAt).toLocaleDateString()}</span>
+                        <span className="text-gray-300">Applied On:</span>
+                        <span className="text-gray-200 ml-2">{new Date(selectedApplication.createdAt).toLocaleDateString()}</span>
                       </div>
                       <div>
-                        <span className="text-gray-400">Last Updated:</span>
-                        <span className="text-white ml-2">{new Date(selectedApplication.updatedAt).toLocaleDateString()}</span>
+                        <span className="text-gray-300">Last Updated:</span>
+                        <span className="text-gray-200 ml-2">{new Date(selectedApplication.updatedAt).toLocaleDateString()}</span>
                       </div>
                       <div>
-                        <span className="text-gray-400">Category:</span>
-                        <span className="text-white ml-2">{formatCategory(selectedApplication.category)}</span>
+                        <span className="text-gray-300">Category:</span>
+                        <span className="text-gray-200 ml-2">{formatCategory(selectedApplication.category)}</span>
                       </div>
                     </CardContent>
                   </Card>
                 </div>
                 
-                <Card className="bg-gray-800 border-gray-700">
+                <Card className="bg-gray-800 border-gray-600 shadow-md">
                   <CardHeader>
-                    <CardTitle className="text-white">Cover Letter</CardTitle>
+                      <CardTitle className="text-gray-200">Cover Letter</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-white whitespace-pre-wrap">{selectedApplication.coverLetter}</p>
+                    <p className="text-gray-200 whitespace-pre-wrap">{selectedApplication.coverLetter}</p>
                   </CardContent>
                 </Card>
                 
                 {selectedApplication.portfolio && (
-                  <Card className="bg-gray-800 border-gray-700">
+                  <Card className="bg-gray-800 border-gray-600 shadow-md">
                     <CardHeader>
-                      <CardTitle className="text-white">Portfolio</CardTitle>
+                      <CardTitle className="text-gray-200">Portfolio</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-white break-words">{selectedApplication.portfolio}</p>
+                      <p className="text-gray-200 break-words">{selectedApplication.portfolio}</p>
                     </CardContent>
                   </Card>
                 )}
               </TabsContent>
               
               <TabsContent value="skills" className="space-y-4 mt-4">
-                <Card className="bg-gray-800 border-gray-700">
+                <Card className="bg-gray-800 border-gray-600 shadow-md">
                   <CardHeader>
-                    <CardTitle className="text-white">Skills</CardTitle>
+                      <CardTitle className="text-gray-200">Skills</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
@@ -615,21 +615,21 @@ export default function ApplicationsManagement() {
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-gray-800 border-gray-700">
+                <Card className="bg-gray-800 border-gray-600 shadow-md">
                   <CardHeader>
-                    <CardTitle className="text-white">Experience</CardTitle>
+                      <CardTitle className="text-gray-200">Experience</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-white">{selectedApplication.experience} years of experience</p>
+                    <p className="text-gray-200">{selectedApplication.experience} years of experience</p>
                   </CardContent>
                 </Card>
               </TabsContent>
               
               <TabsContent value="notes" className="space-y-4 mt-4">
-                <Card className="bg-gray-800 border-gray-700">
+                <Card className="bg-gray-800 border-gray-600 shadow-md">
                   <CardHeader>
-                    <CardTitle className="text-white">Admin Notes</CardTitle>
-                    <CardDescription className="text-gray-400">
+                      <CardTitle className="text-gray-200">Admin Notes</CardTitle>
+                    <CardDescription className="text-gray-300">
                       Add private notes about this application
                     </CardDescription>
                   </CardHeader>
@@ -637,7 +637,7 @@ export default function ApplicationsManagement() {
                     <Textarea 
                       value={adminNotes} 
                       onChange={(e) => setAdminNotes(e.target.value)}
-                      className="bg-gray-900 border-gray-700 text-white min-h-[150px]"
+                      className="bg-gray-900 border-gray-600 text-gray-200 min-h-[150px] focus:border-purple-500"
                       placeholder="Add your notes here..."
                     />
                   </CardContent>
@@ -650,7 +650,7 @@ export default function ApplicationsManagement() {
                 <Button 
                   variant="outline" 
                   onClick={() => router.push(`/admin/messages?userId=${selectedApplication.userId}`)}
-                  className="border-gray-700 text-white hover:bg-gray-800"
+                  className="border-gray-600 text-white hover:bg-gray-700"
                 >
                   Message Applicant
                 </Button>
@@ -701,7 +701,7 @@ export default function ApplicationsManagement() {
             }
           }}
         >
-          <DialogContent className="bg-gray-900 text-white border-gray-700 max-w-2xl h-[70vh] flex flex-col">
+          <DialogContent className="bg-gray-900 text-gray-200 border-gray-600 max-w-2xl h-[70vh] flex flex-col shadow-xl">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -732,7 +732,7 @@ export default function ApplicationsManagement() {
                     Chat with {selectedApplication.user.fullName || selectedApplication.user.username}
                   </motion.div>
                 </DialogTitle>
-                <DialogDescription className="text-gray-400">
+                <DialogDescription className="text-gray-300">
                   Discuss the freelancer application
                 </DialogDescription>
               </DialogHeader>

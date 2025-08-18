@@ -23,7 +23,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, CheckCircle, Clock, MessageSquare, Plus, X, User, Calendar, Award, ExternalLink, Send, Briefcase } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, Plus, X, User, Calendar, Award, ExternalLink, Briefcase } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 
@@ -45,25 +45,6 @@ interface Application {
   updatedAt: string;
 }
 
-interface Message {
-  id: string;
-  content: string;
-  senderId: string;
-  receiverId: string;
-  read: boolean;
-  applicationId: string | null;
-  createdAt: string;
-  sender: {
-    id: string;
-    username: string;
-    fullName: string | null;
-  };
-  receiver: {
-    id: string;
-    username: string;
-    fullName: string | null;
-  };
-}
 
 export default function BecomeFreelancer() {
   const router = useRouter();
@@ -73,11 +54,6 @@ export default function BecomeFreelancer() {
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [activeAdmins, setActiveAdmins] = useState<{id: string, username: string, fullName: string | null}[]>([]);
-  const [selectedAdminId, setSelectedAdminId] = useState<string>('');
-  const [loadingMessages, setLoadingMessages] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // Form state
@@ -126,10 +102,6 @@ export default function BecomeFreelancer() {
         const data = await response.json();
         setApplication(data.application);
         
-        // If application exists, fetch messages
-        if (data.application) {
-          fetchMessages();
-        }
       } catch (err) {
         console.error('Error fetching application:', err);
         setError('Failed to load your application. Please try again later.');
@@ -141,100 +113,6 @@ export default function BecomeFreelancer() {
     fetchApplication();
   }, [router]);
 
-  // Fetch messages for the application
-  const fetchMessages = async () => {
-    try {
-      setLoadingMessages(true);
-      
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/auth/login');
-        return;
-      }
-      
-      // Fetch admins first to get their IDs
-      const adminsResponse = await fetch('/api/admin/users?role=ADMIN', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!adminsResponse.ok) {
-        if (adminsResponse.status !== 404) {
-          console.error('Error fetching admins');
-        }
-      } else {
-        const adminsData = await adminsResponse.json();
-        if (adminsData.users && adminsData.users.length > 0) {
-          setActiveAdmins(adminsData.users);
-          setSelectedAdminId(adminsData.users[0].id);
-        }
-      }
-      
-      // Now fetch messages with the first admin or any admin if application exists
-      if (application) {
-        const messagesResponse = await fetch(`/api/messages?applicationId=${application.id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (!messagesResponse.ok) {
-          if (messagesResponse.status !== 404) {
-            console.error('Error fetching messages');
-          }
-        } else {
-          const messagesData = await messagesResponse.json();
-          setMessages(messagesData.messages || []);
-        }
-      }
-    } catch (err) {
-      console.error('Error fetching messages:', err);
-    } finally {
-      setLoadingMessages(false);
-    }
-  };
-
-  // Send a message
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !application || !selectedAdminId) return;
-    
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/auth/login');
-        return;
-      }
-      
-      const response = await fetch('/api/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          content: newMessage,
-          receiverId: selectedAdminId,
-          applicationId: application.id
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      setMessages([...messages, data.message]);
-      setNewMessage('');
-    } catch (err) {
-      console.error('Error sending message:', err);
-      toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
 
   // Add skill to the list
   const addSkill = () => {
@@ -311,8 +189,6 @@ export default function BecomeFreelancer() {
       setPortfolio('');
       setCoverLetter('');
       
-      // Fetch messages after application is created
-      fetchMessages();
     } catch (err: any) {
       console.error('Error submitting application:', err);
       setError(err.message || 'Failed to submit application. Please try again later.');
@@ -359,7 +235,7 @@ export default function BecomeFreelancer() {
       case 'INTERVIEW':
         return (
           <div className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-blue-400" />
+            <Clock className="h-5 w-5 text-blue-400" />
             <Badge className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-medium hover:from-blue-600 hover:to-indigo-600">
               Interview Requested
             </Badge>
@@ -572,12 +448,6 @@ export default function BecomeFreelancer() {
                 >
                   Application Details
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="messages"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-pink-600 data-[state=active]:text-white text-gray-300 px-6 py-2 rounded-md transition-all duration-200"
-                >
-                  Messages
-                </TabsTrigger>
               </TabsList>
               
               <TabsContent value="details" className="space-y-8">
@@ -594,10 +464,10 @@ export default function BecomeFreelancer() {
                 
                 {application.status === 'INTERVIEW' && (
                   <Alert className="bg-gradient-to-r from-blue-900/20 to-indigo-900/20 border border-blue-500/30 backdrop-blur-sm">
-                    <MessageSquare className="h-5 w-5 text-blue-400" />
+                    <Clock className="h-5 w-5 text-blue-400" />
                     <AlertTitle className="text-blue-300 font-semibold">Interview Requested</AlertTitle>
                     <AlertDescription className="text-blue-200">
-                      Great news! An admin would like to discuss your application. Please check the Messages tab to continue the conversation.
+                      Great news! An admin would like to discuss your application. Please check your messages to continue the conversation.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -671,76 +541,6 @@ export default function BecomeFreelancer() {
                 </div>
               </TabsContent>
               
-              <TabsContent value="messages" className="space-y-6">
-                <div className="bg-gray-800/30 rounded-lg border border-gray-700/50 overflow-hidden">
-                  {/* Messages Container */}
-                  <div className="h-96 overflow-y-auto p-6 space-y-4">
-                    {messages.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
-                        <MessageSquare className="h-12 w-12 text-gray-500" />
-                        <div>
-                          <p className="text-gray-400 text-lg font-medium">No messages yet</p>
-                          <p className="text-gray-500 text-sm">Start a conversation with an admin to discuss your application</p>
-                        </div>
-                      </div>
-                    ) : (
-                      messages.map((message) => {
-                        const isOutgoing = message.senderId === 'user1';
-                        return (
-                          <div 
-                            key={message.id} 
-                            className={`flex ${isOutgoing ? 'justify-end' : 'justify-start'}`}
-                          >
-                            <div 
-                              className={`max-w-[75%] rounded-2xl px-4 py-3 ${
-                                isOutgoing 
-                                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' 
-                                  : 'bg-gray-700 text-white'
-                              }`}
-                            >
-                              <p className="text-sm font-medium mb-1">
-                                {isOutgoing ? 'You' : message.sender.fullName || message.sender.username}
-                              </p>
-                              <p className="leading-relaxed">{message.content}</p>
-                              <p className="text-xs opacity-70 mt-2">
-                                {new Date(message.createdAt).toLocaleTimeString([], { 
-                                  hour: '2-digit', 
-                                  minute: '2-digit' 
-                                })}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                  
-                  {/* Message Input */}
-                  <div className="border-t border-gray-700/50 p-4 bg-gray-800/50">
-                    <div className="flex gap-3">
-                      <Input
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Type your message..."
-                        className="flex-1 bg-gray-700/50 border-gray-600 text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent h-12 text-base"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            sendMessage();
-                          }
-                        }}
-                      />
-                      <Button 
-                        onClick={sendMessage}
-                        disabled={!newMessage.trim()}
-                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white h-12 px-6 font-medium transition-all duration-200 disabled:opacity-50"
-                      >
-                        <Send className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
