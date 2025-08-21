@@ -17,6 +17,7 @@ export type Review = {
 };
 
 export type Profile = {
+  id: string; // Add id field for service fetching
   username: string;
   displayName: string;
   avatarUrl?: string;
@@ -35,92 +36,76 @@ export type Profile = {
   reviewsList: Review[];
 };
 
-const mockProfiles: Profile[] = [
-  {
-    username: 'nexus',
-    displayName: 'Nexus Dev',
-    avatarUrl: 'https://api.dicebear.com/7.x/thumbs/svg?seed=Nexus',
-    tagline: 'Full‑stack developer • Next.js • UI/UX',
-    about:
-      'I build robust, scalable web apps with a focus on clean UI and great UX. Specialized in Next.js, TypeScript, and design systems.',
-    location: 'Dhaka, BD',
-    memberSince: '2022-04-12T00:00:00.000Z',
-    lastDelivery: '2025-06-20T00:00:00.000Z',
-    languages: [
-      { name: 'English', level: 'Fluent' },
-      { name: 'Bengali', level: 'Native/Bilingual' },
-    ],
-    skills: ['Next.js', 'TypeScript', 'Tailwind', 'Node.js', 'Framer Motion', 'UI/UX'],
-    rating: 4.9,
-    reviews: 128,
-    ordersInQueue: 2,
-    gigs: [
-      {
-        id: 'g1',
-        title: 'I will build a modern Next.js app with beautiful UI',
-        coverUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop',
-        priceFrom: 199,
-        rating: 4.9,
-        reviews: 87,
-      },
-      {
-        id: 'g2',
-        title: 'I will design and implement a scalable API',
-        coverUrl: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1200&auto=format&fit=crop',
-        priceFrom: 149,
-        rating: 4.8,
-        reviews: 54,
-      },
-      {
-        id: 'g3',
-        title: 'I will refactor your React codebase to TypeScript',
-        coverUrl: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1200&auto=format&fit=crop',
-        priceFrom: 99,
-        rating: 5,
-        reviews: 12,
-      },
-    ],
-    portfolio: [
-      { id: 'p1', title: 'Dashboard UI', imageUrl: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=1200&auto=format&fit=crop' },
-      { id: 'p2', title: 'Auth Experience', imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format&fit=crop' },
-      { id: 'p3', title: 'Marketing Site', imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1200&auto=format&fit=crop' },
-    ],
-    reviewsList: [
-      {
-        id: 'r1',
-        author: 'Alex J.',
-        rating: 5,
-        date: '2025-07-01T00:00:00.000Z',
-        content: 'Great work, clean code and on time delivery. Highly recommended!'
-      },
-      {
-        id: 'r2',
-        author: 'Ripper Design',
-        rating: 5,
-        date: '2025-06-02T00:00:00.000Z',
-        content: 'Superb UI polish and helpful communication throughout.'
-      },
-      {
-        id: 'r3',
-        author: 'Peng',
-        rating: 4,
-        date: '2025-05-18T00:00:00.000Z',
-        content: 'Solid delivery and code quality. Will hire again.'
-      }
-    ],
-  },
-];
+// Mock data removed - using real database data only
 
 export async function getProfile(username: string): Promise<Profile | null> {
-  // Simulate fetch latency
-  await new Promise((r) => setTimeout(r, 200));
-  return (
-    mockProfiles.find((p) => p.username.toLowerCase() === username.toLowerCase()) || null
-  );
+  try {
+    // Import prisma here to avoid circular dependencies
+    const { prisma } = await import('./prisma');
+    
+    // Find the user with their profile
+    const user = await prisma.user.findUnique({
+      where: { username },
+      include: { profile: true, freelancerApplication: true }
+    });
+
+    if (!user || user.role !== 'FREELANCER' || !user.profile) {
+      return null;
+    }
+
+    // Parse skills from JSON string
+    const skills = user.profile.skills ? JSON.parse(user.profile.skills) : [];
+    
+    // Parse languages from JSON string
+    const languages = user.profile.languages ? JSON.parse(user.profile.languages) : [];
+    
+    // Return profile with required fields
+    return {
+      id: user.profile.id, // Add id field for service fetching
+      username: user.username,
+      displayName: user.fullName || user.username,
+      avatarUrl: user.profile.avatarUrl || undefined,
+      tagline: user.profile.tagline || undefined,
+      about: user.profile.bio || undefined,
+      location: user.profile.location || undefined,
+      memberSince: user.createdAt?.toISOString() || undefined,
+      languages: languages,
+      skills: skills,
+      rating: 5, // Default values for required fields
+      reviews: 0,
+      gigs: [],
+      reviewsList: []
+    };
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    return null;
+  }
 }
 
-export function formatDate(iso?: string): string {
-  if (!iso) return '';
-  const d = new Date(iso);
-  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short' });
+export async function getProfileServices(profileId: string) {
+  try {
+    // Import prisma here to avoid circular dependencies
+    const { prisma } = await import('./prisma');
+    
+    const services = await prisma.service.findMany({
+      where: {
+        profileId: profileId
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+    
+    return services;
+  } catch (error) {
+    console.error('Error fetching profile services:', error);
+    return [];
+  }
+}
+
+export function formatDate(date: Date | string) {
+  return new Date(date).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  });
 }

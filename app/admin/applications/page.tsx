@@ -425,19 +425,19 @@ export default function ApplicationsManagement() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-white">Freelancer Applications</h1>
+        <h1 className="text-3xl font-bold text-purple-200">Freelancer Applications</h1>
         <div className="flex gap-4">
           <Input
             placeholder="Search applications..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-[300px] bg-gray-800 border-gray-700 text-white focus:ring-[#9945FF]"
+            className="w-[300px] bg-gray-800 border-gray-700 text-purple-200 focus:ring-[#9945FF]"
           />
           <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-white focus:ring-[#9945FF]">
+            <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-purple-200 focus:ring-[#9945FF]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700 text-white shadow-lg">
+            <SelectContent className="bg-gray-800 border-gray-700 text-purple-200 shadow-lg">
               <SelectItem value="All">All Status</SelectItem>
               <SelectItem value="PENDING">Pending</SelectItem>
               <SelectItem value="APPROVED">Approved</SelectItem>
@@ -475,20 +475,20 @@ export default function ApplicationsManagement() {
               ) : (
                 filteredApplications.map((application) => (
                   <TableRow key={application.id} className="hover:bg-gray-800/70 border-gray-700">
-                    <TableCell className="font-medium text-gray-200">
+                    <TableCell className="font-medium text-purple-200">
                       {application.user.fullName || application.user.username}
                       <div className="text-sm text-gray-300">{application.user.email}</div>
                     </TableCell>
-                    <TableCell className="text-gray-200">{formatCategory(application.category)}</TableCell>
-                    <TableCell className="text-gray-200">{application.experience} years</TableCell>
-                    <TableCell className="text-gray-200">{new Date(application.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-purple-200">{formatCategory(application.category)}</TableCell>
+                    <TableCell className="text-purple-200">{application.experience} years</TableCell>
+                    <TableCell className="text-purple-200">{new Date(application.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>{getStatusBadge(application.status)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button 
                           variant="outline" 
                           size="sm"
-                          className="border-gray-600 text-gray-200 hover:bg-gray-700"
+                          className="bg-purple-600 text-white hover:bg-purple-700 border-purple-700"
                           onClick={() => openApplicationDetails(application)}
                         >
                           Details
@@ -496,7 +496,7 @@ export default function ApplicationsManagement() {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          className="border-gray-600 text-gray-200 hover:bg-gray-700"
+                          className="bg-purple-600 text-white hover:bg-purple-700 border-purple-700"
                           onClick={() => router.push(`/admin/messages?userId=${application.userId}`)}
                         >
                           Chat
@@ -533,31 +533,31 @@ export default function ApplicationsManagement() {
                 <div className="grid grid-cols-2 gap-4">
                   <Card className="bg-gray-800 border-gray-600 shadow-md">
                     <CardHeader>
-                      <CardTitle className="text-gray-200">Applicant Information</CardTitle>
+                      <CardTitle className="text-purple-200">Applicant Information</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <div>
                         <span className="text-gray-300">Name:</span>
-                        <span className="text-gray-200 ml-2">{selectedApplication.user.fullName || selectedApplication.user.username}</span>
+                        <span className="text-purple-200 ml-2">{selectedApplication.user.fullName || selectedApplication.user.username}</span>
                       </div>
                       <div>
                         <span className="text-gray-300">Email:</span>
-                        <span className="text-gray-200 ml-2">{selectedApplication.user.email}</span>
+                        <span className="text-purple-200 ml-2">{selectedApplication.user.email}</span>
                       </div>
                       <div>
                         <span className="text-gray-300">Username:</span>
-                        <span className="text-gray-200 ml-2">{selectedApplication.user.username}</span>
+                        <span className="text-purple-200 ml-2">{selectedApplication.user.username}</span>
                       </div>
                       <div>
                         <span className="text-gray-300">Member Since:</span>
-                        <span className="text-gray-200 ml-2">{new Date(selectedApplication.user.createdAt).toLocaleDateString()}</span>
+                        <span className="text-purple-200 ml-2">{new Date(selectedApplication.user.createdAt).toLocaleDateString()}</span>
                       </div>
                     </CardContent>
                   </Card>
                   
                   <Card className="bg-gray-800 border-gray-600 shadow-md">
                     <CardHeader>
-                      <CardTitle className="text-gray-200">Application Status</CardTitle>
+                      <CardTitle className="text-purple-200">Application Status</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <div>
@@ -566,15 +566,15 @@ export default function ApplicationsManagement() {
                       </div>
                       <div>
                         <span className="text-gray-300">Applied On:</span>
-                        <span className="text-gray-200 ml-2">{new Date(selectedApplication.createdAt).toLocaleDateString()}</span>
+                        <span className="text-purple-200 ml-2">{new Date(selectedApplication.createdAt).toLocaleDateString()}</span>
                       </div>
                       <div>
                         <span className="text-gray-300">Last Updated:</span>
-                        <span className="text-gray-200 ml-2">{new Date(selectedApplication.updatedAt).toLocaleDateString()}</span>
+                        <span className="text-purple-200 ml-2">{new Date(selectedApplication.updatedAt).toLocaleDateString()}</span>
                       </div>
                       <div>
                         <span className="text-gray-300">Category:</span>
-                        <span className="text-gray-200 ml-2">{formatCategory(selectedApplication.category)}</span>
+                        <span className="text-purple-200 ml-2">{formatCategory(selectedApplication.category)}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -582,20 +582,20 @@ export default function ApplicationsManagement() {
                 
                 <Card className="bg-gray-800 border-gray-600 shadow-md">
                   <CardHeader>
-                      <CardTitle className="text-gray-200">Cover Letter</CardTitle>
+                      <CardTitle className="text-purple-200">Cover Letter</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-200 whitespace-pre-wrap">{selectedApplication.coverLetter}</p>
+                    <p className="text-purple-200 whitespace-pre-wrap">{selectedApplication.coverLetter}</p>
                   </CardContent>
                 </Card>
                 
                 {selectedApplication.portfolio && (
                   <Card className="bg-gray-800 border-gray-600 shadow-md">
                     <CardHeader>
-                      <CardTitle className="text-gray-200">Portfolio</CardTitle>
+                      <CardTitle className="text-purple-200">Portfolio</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-gray-200 break-words">{selectedApplication.portfolio}</p>
+                      <p className="text-purple-200 break-words">{selectedApplication.portfolio}</p>
                     </CardContent>
                   </Card>
                 )}
@@ -604,7 +604,7 @@ export default function ApplicationsManagement() {
               <TabsContent value="skills" className="space-y-4 mt-4">
                 <Card className="bg-gray-800 border-gray-600 shadow-md">
                   <CardHeader>
-                      <CardTitle className="text-gray-200">Skills</CardTitle>
+                      <CardTitle className="text-purple-200">Skills</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
@@ -617,10 +617,10 @@ export default function ApplicationsManagement() {
                 
                 <Card className="bg-gray-800 border-gray-600 shadow-md">
                   <CardHeader>
-                      <CardTitle className="text-gray-200">Experience</CardTitle>
+                      <CardTitle className="text-purple-200">Experience</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-200">{selectedApplication.experience} years of experience</p>
+                    <p className="text-purple-200">{selectedApplication.experience} years of experience</p>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -628,7 +628,7 @@ export default function ApplicationsManagement() {
               <TabsContent value="notes" className="space-y-4 mt-4">
                 <Card className="bg-gray-800 border-gray-600 shadow-md">
                   <CardHeader>
-                      <CardTitle className="text-gray-200">Admin Notes</CardTitle>
+                      <CardTitle className="text-purple-200">Admin Notes</CardTitle>
                     <CardDescription className="text-gray-300">
                       Add private notes about this application
                     </CardDescription>
@@ -637,7 +637,7 @@ export default function ApplicationsManagement() {
                     <Textarea 
                       value={adminNotes} 
                       onChange={(e) => setAdminNotes(e.target.value)}
-                      className="bg-gray-900 border-gray-600 text-gray-200 min-h-[150px] focus:border-purple-500"
+                      className="bg-gray-900 border-gray-600 text-purple-200 min-h-[150px] focus:border-purple-500"
                       placeholder="Add your notes here..."
                     />
                   </CardContent>
@@ -650,30 +650,24 @@ export default function ApplicationsManagement() {
                 <Button 
                   variant="outline" 
                   onClick={() => router.push(`/admin/messages?userId=${selectedApplication.userId}`)}
-                  className="border-gray-600 text-white hover:bg-gray-700"
+                  className="bg-purple-600 text-white hover:bg-purple-700 border-purple-700"
                 >
                   Message Applicant
                 </Button>
               </div>
               <div className="flex gap-2">
                 <Button 
+                  variant="outline" 
+                  onClick={() => updateApplicationStatus('APPROVED')}
+                  className="bg-purple-600 text-white hover:bg-purple-700 border-purple-700"
+                >
+                  Approve
+                </Button>
+                <Button 
                   variant="destructive" 
                   onClick={() => updateApplicationStatus('REJECTED')}
                 >
                   Reject
-                </Button>
-                <Button 
-                  variant="outline"
-                  className="border-blue-500 text-blue-500 hover:bg-blue-500/10"
-                  onClick={() => updateApplicationStatus('INTERVIEW')}
-                >
-                  Request Interview
-                </Button>
-                <Button 
-                  className="bg-green-600 hover:bg-green-700"
-                  onClick={() => updateApplicationStatus('APPROVED')}
-                >
-                  Approve
                 </Button>
               </div>
             </DialogFooter>

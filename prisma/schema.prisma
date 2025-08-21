@@ -25,14 +25,38 @@ model User {
 }
 
 model Profile {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  bio       String?  @db.Text
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  bio       String?   @db.Text
   avatarUrl String?
-  skills    String?  @db.LongText
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skills    String?   @db.Text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  languages String?   @db.Text
+  location  String?   @db.VarChar(100)
+  tagline   String?   @db.VarChar(100)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  services  Service[]
+}
+
+model Service {
+  id           String   @id @default(cuid())
+  title        String   @db.VarChar(100)
+  description  String   @db.Text
+  coverUrl     String?
+  category     String
+  priceFrom    Float
+  priceTo      Float?
+  deliveryDays Int
+  revisions    Int      @default(1)
+  features     String   @db.Text
+  tags         String?  @db.Text
+  profileId    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId], map: "Service_profileId_fkey")
 }
 
 model FreelancerApplication {
@@ -57,9 +81,9 @@ model Message {
   receiverId    String
   read          Boolean  @default(false)
   applicationId String?
-  attachments   String?  @db.LongText
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  attachments   String?  @db.LongText
   receiver      User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
   sender        User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 

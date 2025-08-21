@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { withAdminProtection } from "@/lib/adminAuthClient";
 import { 
   Search, 
   MoreHorizontal, 
@@ -31,8 +33,9 @@ interface PortfolioItem {
 }
 
 interface Freelancer {
-  id: number;
+  id: string;
   name: string;
+  username: string;
   avatar: string;
   email: string;
   category: string;
@@ -45,8 +48,8 @@ interface Freelancer {
   verified: boolean;
   featured: boolean;
   skills: string[];
-  languages: string[];
-  portfolio: PortfolioItem[];
+  languages?: string[];
+  portfolio?: PortfolioItem[];
 }
 
 import FadeIn from "@/components/FadeIn";
@@ -91,8 +94,9 @@ import Image from "next/image";
 // Mock data for freelancers
 const mockFreelancers: Freelancer[] = [
   {
-    id: 1,
+    id: "1",
     name: "Sarah Williams",
+    username: "sarahw",
     avatar: "https://ui-avatars.com/api/?name=Sarah+Williams&background=random&color=fff",
     email: "sarah.w@example.com",
     category: "Web Development",
@@ -120,8 +124,9 @@ const mockFreelancers: Freelancer[] = [
     ]
   },
   {
-    id: 2,
+    id: "2",
     name: "Emily Davis",
+    username: "emilyd",
     avatar: "https://ui-avatars.com/api/?name=Emily+Davis&background=random&color=fff",
     email: "emily.d@example.com",
     category: "Graphic Design",
@@ -144,8 +149,9 @@ const mockFreelancers: Freelancer[] = [
     ]
   },
   {
-    id: 3,
+    id: "3",
     name: "Jessica Miller",
+    username: "jessicam",
     avatar: "https://ui-avatars.com/api/?name=Jessica+Miller&background=random&color=fff",
     email: "jessica.m@example.com",
     category: "Content Writing",
@@ -168,8 +174,9 @@ const mockFreelancers: Freelancer[] = [
     ]
   },
   {
-    id: 4,
+    id: "4",
     name: "Robert Taylor",
+    username: "robertt",
     avatar: "https://ui-avatars.com/api/?name=Robert+Taylor&background=random&color=fff",
     email: "robert.t@example.com",
     category: "Video Editing",
@@ -192,8 +199,9 @@ const mockFreelancers: Freelancer[] = [
     ]
   },
   {
-    id: 5,
+    id: "5",
     name: "Lisa Anderson",
+    username: "lisaa",
     avatar: "https://ui-avatars.com/api/?name=Lisa+Anderson&background=random&color=fff",
     email: "lisa.a@example.com",
     category: "Digital Marketing",
@@ -216,8 +224,9 @@ const mockFreelancers: Freelancer[] = [
     ]
   },
   {
-    id: 6,
+    id: "6",
     name: "James Wilson",
+    username: "jamesw",
     avatar: "https://ui-avatars.com/api/?name=James+Wilson&background=random&color=fff",
     email: "james.w@example.com",
     category: "Mobile Development",
@@ -240,8 +249,9 @@ const mockFreelancers: Freelancer[] = [
     ]
   },
   {
-    id: 7,
+    id: "7",
     name: "Emma Thompson",
+    username: "emmat",
     avatar: "https://ui-avatars.com/api/?name=Emma+Thompson&background=random&color=fff",
     email: "emma.t@example.com",
     category: "UI/UX Design",
@@ -265,8 +275,11 @@ const mockFreelancers: Freelancer[] = [
   }
 ];
 
-export default function FreelancersManagement() {
-  const [freelancers, setFreelancers] = useState<Freelancer[]>(mockFreelancers);
+function FreelancersManagement() {
+  const router = useRouter();
+  const [freelancers, setFreelancers] = useState<Freelancer[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedLevel, setSelectedLevel] = useState("All");
@@ -274,12 +287,57 @@ export default function FreelancersManagement() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("skills");
 
+    // Fetch freelancers data
+  useEffect(() => {
+    const fetchFreelancers = async () => {
+      try {
+        setLoading(true);
+        // Get token from localStorage
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setError('Authentication token not found. Please log in again.');
+          setLoading(false);
+          return;
+        }
+        
+        const response = await fetch('/api/admin/freelancers', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch freelancers');
+        }
+        
+        const data = await response.json();
+        
+        // Add default languages and portfolio if not provided
+        const processedFreelancers = data.freelancers.map((freelancer: Freelancer) => ({
+          ...freelancer,
+          languages: freelancer.languages || ['English'],
+          portfolio: freelancer.portfolio || []
+        }));
+        
+        setFreelancers(processedFreelancers);
+      } catch (err) {
+        console.error('Error fetching freelancers:', err);
+        setError('Failed to load freelancers. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchFreelancers();
+  }, []);
+
   // Filter freelancers based on search term, category, and level
   const filteredFreelancers = freelancers.filter(freelancer => {
     const matchesSearch = 
       freelancer.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
       freelancer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      freelancer.category.toLowerCase().includes(searchTerm.toLowerCase());
+      (typeof freelancer.category === 'string' && freelancer.category.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesCategory = selectedCategory === "All" || freelancer.category === selectedCategory;
     const matchesLevel = selectedLevel === "All" || freelancer.level === selectedLevel;
@@ -294,7 +352,7 @@ export default function FreelancersManagement() {
   const levels = ["All", ...new Set(freelancers.map(f => f.level))];
 
   // Toggle featured status
-  const toggleFeatured = (id: number) => {
+  const toggleFeatured = (id: string) => {
     setFreelancers(freelancers.map(freelancer => {
       if (freelancer.id === id) {
         return { ...freelancer, featured: !freelancer.featured };
@@ -308,7 +366,7 @@ export default function FreelancersManagement() {
       <FadeIn>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white">Freelancers Management</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-purple-200">Freelancers Management</h1>
             <p className="text-gray-400">Manage all freelancers on the platform</p>
           </div>
         </div>
@@ -316,43 +374,43 @@ export default function FreelancersManagement() {
 
       {/* Filters and Search */}
       <FadeIn>
-        <Card className="bg-gray-900 border-gray-800 text-white shadow-lg">
+        <Card className="bg-gray-900 border-gray-800 text-purple-200 shadow-lg">
           <CardContent className="p-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <Input 
                   placeholder="Search freelancers..." 
-                  className="pl-10 bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus-visible:ring-[#9945FF]"
+                  className="pl-10 bg-gray-800 border-gray-700 text-purple-200 placeholder:text-gray-400 focus-visible:ring-[#9945FF]"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               <div className="flex gap-2">
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-white focus:ring-[#9945FF]">
+                  <SelectTrigger className="w-[180px] bg-gray-800 border-gray-700 text-purple-200 focus:ring-[#9945FF]">
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                  <SelectContent className="bg-gray-800 border-gray-700 text-purple-200">
                     {categories.map(category => (
                       <SelectItem key={category} value={category}>{category}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                  <SelectTrigger className="w-[150px] bg-gray-800 border-gray-700 text-white focus:ring-[#9945FF]">
+                  <SelectTrigger className="w-[150px] bg-gray-800 border-gray-700 text-purple-200 focus:ring-[#9945FF]">
                     <SelectValue placeholder="Level" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                  <SelectContent className="bg-gray-800 border-gray-700 text-purple-200">
                     {levels.map(level => (
                       <SelectItem key={level} value={level}>{level}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <Button variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800">
+                <Button variant="outline" className="bg-purple-600 text-white hover:bg-purple-700 border-purple-700">
                   <Filter className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800">
+                <Button variant="outline" className="bg-purple-600 text-white hover:bg-purple-700 border-purple-700">
                   <Download className="h-4 w-4" />
                 </Button>
               </div>
@@ -363,13 +421,27 @@ export default function FreelancersManagement() {
 
       {/* Freelancers Table */}
       <FadeIn>
-        <Card className="bg-gray-900 border-gray-800 text-white shadow-lg">
+        <Card className="bg-gray-900 border-gray-800 text-purple-200 shadow-lg">
           <CardContent className="p-0">
             <div className="p-4 border-b border-gray-800 flex items-center justify-between">
               <div className="text-sm text-gray-400">
                 Showing {filteredFreelancers.length} of {freelancers.length} freelancers
               </div>
             </div>
+            
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#9945FF]"></div>
+              </div>
+            ) : error ? (
+              <div className="flex justify-center items-center h-64 text-red-400">
+                {error}
+              </div>
+            ) : filteredFreelancers.length === 0 ? (
+              <div className="flex justify-center items-center h-64 text-gray-400">
+                No freelancers found
+              </div>
+            ) : (
             <Table>
               <TableHeader>
                 <TableRow className="border-gray-800 hover:bg-gray-800/50">
@@ -452,7 +524,7 @@ export default function FreelancersManagement() {
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="h-8 w-8 text-gray-400 hover:text-white hover:bg-gray-800"
+                          className="h-8 w-8 text-white bg-purple-600 hover:bg-purple-700"
                           onClick={() => {
                             setSelectedFreelancer(freelancer);
                             setIsViewDialogOpen(true);
@@ -463,21 +535,21 @@ export default function FreelancersManagement() {
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="h-8 w-8 text-gray-400 hover:text-white hover:bg-gray-800"
+                          className="h-8 w-8 text-white bg-purple-600 hover:bg-purple-700"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-white hover:bg-gray-800">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white bg-purple-600 hover:bg-purple-700">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="bg-gray-900 border-gray-800 text-gray-300">
-                            <DropdownMenuItem className="hover:bg-gray-800 hover:text-white cursor-pointer">
+                            <DropdownMenuItem className="hover:bg-gray-800 hover:text-purple-200 cursor-pointer">
                               View Services
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="hover:bg-gray-800 hover:text-white cursor-pointer">
+                            <DropdownMenuItem className="hover:bg-gray-800 hover:text-purple-200 cursor-pointer">
                               Message
                             </DropdownMenuItem>
                             <DropdownMenuItem className="hover:bg-gray-800 hover:text-red-400 cursor-pointer">
@@ -491,6 +563,7 @@ export default function FreelancersManagement() {
                 ))}
               </TableBody>
             </Table>
+            )}
           </CardContent>
         </Card>
       </FadeIn>
@@ -498,7 +571,7 @@ export default function FreelancersManagement() {
       {/* View Freelancer Dialog */}
       {selectedFreelancer && (
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-3xl">
+          <DialogContent className="bg-gray-900 border-gray-800 text-purple-200 max-w-3xl">
             <DialogHeader>
               <DialogTitle>Freelancer Profile</DialogTitle>
               <DialogDescription className="text-gray-400">
@@ -575,8 +648,15 @@ export default function FreelancersManagement() {
               {/* Tabs for more details */}
               <Tabs defaultValue="skills" className="w-full">
                 <TabsList className="bg-gray-800 border-gray-700">
-                  <TabsTrigger value="skills" className="data-[state=active]:bg-gray-700">Skills & Languages</TabsTrigger>
-                  <TabsTrigger value="portfolio" className="data-[state=active]:bg-gray-700">Portfolio</TabsTrigger>
+                  <TabsTrigger value="skills" className="data-[state=active]:bg-gray-700">
+                    Skills & Languages
+                  </TabsTrigger>
+                  <TabsTrigger value="portfolio" className="data-[state=active]:bg-gray-700">
+                    Portfolio
+                  </TabsTrigger>
+                  <TabsTrigger value="applications" className="data-[state=active]:bg-gray-700">
+                    Applications
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="skills" className="pt-4">
                   <div className="space-y-4">
@@ -593,16 +673,16 @@ export default function FreelancersManagement() {
                     <div>
                       <Label className="text-gray-400 mb-2 block">Languages</Label>
                       <div className="flex flex-wrap gap-2">
-                        {selectedFreelancer?.languages.map((language, index) => (
+                        {selectedFreelancer?.languages?.map((language, index) => (
                           <div key={index} className="text-sm">{language}</div>
-                        ))}
+                        )) || <div className="text-sm text-gray-400">No languages specified</div>}
                       </div>
                     </div>
                   </div>
                 </TabsContent>
                 <TabsContent value="portfolio" className="pt-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {selectedFreelancer?.portfolio.map((item, index) => (
+                    {selectedFreelancer?.portfolio?.map((item, index) => (
                       <div key={index} className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
                         <div className="aspect-video relative">
                           <Image 
@@ -628,13 +708,13 @@ export default function FreelancersManagement() {
               <DialogClose asChild>
                 <Button 
                   variant="outline" 
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                  className="bg-purple-600 text-white hover:bg-purple-700 border-purple-700"
                 >
                   Close
                 </Button>
               </DialogClose>
               <Button 
-                className="bg-gradient-to-r from-[#9945FF] to-[#00a2ff] hover:from-[#8935EF] hover:to-[#0092EF] text-white"
+                className="bg-purple-600 text-white hover:bg-purple-700 border-purple-700"
               >
                 Message Freelancer
               </Button>
@@ -645,3 +725,5 @@ export default function FreelancersManagement() {
     </div>
   );
 }
+
+export default withAdminProtection(FreelancersManagement);

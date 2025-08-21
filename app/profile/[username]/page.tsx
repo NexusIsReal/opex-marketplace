@@ -1,8 +1,35 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getProfile, formatDate } from '@/lib/profile';
-import { Star, MapPin, Calendar, Clock, Award, Briefcase, MessageCircle, Heart, Share2, ExternalLink, ChevronRight, Zap, Shield, Trophy, Users, Check } from 'lucide-react';
+import { cookies } from 'next/headers';
+import { Star, MapPin, Calendar, Clock, Award, Briefcase, MessageCircle, Heart, Share2, ExternalLink, ChevronRight, Zap, Shield, Trophy, Users, Check, Plus, Edit, Settings, Package } from 'lucide-react';
+import { Badge as UIBadge } from '@/components/ui/badge';
+import ServiceCard from '@/components/ServiceCard';
+import { getProfile, formatDate, getProfileServices } from '@/lib/profile';
+import { getServerSession } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+
+// Define types locally since they're not available in this context
+interface User {
+  id: string;
+  email: string;
+  username: string;
+  role: string;
+}
+
+interface Service {
+  id: string;
+  title: string;
+  description: string;
+  coverUrl: string | null;
+  category: string;
+  priceFrom: number;
+  priceTo: number | null;
+  deliveryDays: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 type StarSize = 'sm' | 'lg';
 function Stars({ rating, size = 'sm', showNumber = false }: { rating: number; size?: StarSize; showNumber?: boolean }) {
@@ -60,7 +87,7 @@ function StatCard({ icon: Icon, label, value, accent = false }: { icon: IconType
 }
 
 type BadgeVariant = 'default' | 'success' | 'warning' | 'accent';
-function Badge({ children, variant = 'default' }: { children: React.ReactNode; variant?: BadgeVariant }) {
+function ProfileBadge({ children, variant = 'default' }: { children: React.ReactNode; variant?: BadgeVariant }) {
   const variants: Record<BadgeVariant, string> = {
     default: 'bg-gray-800/50 border-gray-600/50 text-gray-300',
     success: 'bg-emerald-600/20 border-emerald-500/40 text-emerald-300',
@@ -73,10 +100,36 @@ function Badge({ children, variant = 'default' }: { children: React.ReactNode; v
 
 export const dynamic = 'force-dynamic';
 
+export async function generateMetadata({ params }: { params: Promise<{ username: string }> }) {
+  const { username } = await params;
+  const profile = await getProfile(username);
+  
+  if (!profile) return notFound();
+
+  return {
+    title: `${profile.displayName} (@${profile.username}) - Professional Profile`,
+    description: profile.tagline || `View ${profile.displayName}'s professional profile and services`,
+  };
+}
+
 export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
   const profile = await getProfile(username);
+  
   if (!profile) return notFound();
+  
+  // Get current user from session using our server-side auth function
+  const cookieStore = cookies();
+  const session = await getServerSession(cookieStore);
+  const currentUser = session?.user as User | undefined;
+
+  // Fetch real services from the database for this profile
+  let services: Service[] = [];
+  
+  if (profile.id) {
+    // Use the dedicated function to fetch services
+    services = await getProfileServices(profile.id);
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-800 relative overflow-hidden pt-16 pb-16 sm:pt-24 md:pt-28">
@@ -133,11 +186,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight">
                     {profile.displayName}
                   </h1>
-                  <Badge variant="success">
+                  <ProfileBadge>
                     <Check className="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
                     <span className="hidden sm:inline">Verified Pro</span>
                     <span className="sm:hidden">Pro</span>
-                  </Badge>
+                  </ProfileBadge>
                 </div>
                 
                 <p className="text-gray-400 text-base sm:text-lg mb-2">@{profile.username}</p>
@@ -193,8 +246,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-8 sm:pb-16">
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-12">
-          <StatCard icon={Trophy} label="Rating" value={`${profile.rating.toFixed(1)}/5`} accent />
-          <StatCard icon={Users} label="Reviews" value={`${profile.reviews}+`} />
+          <StatCard icon={Trophy} label="Rating" value={profile.rating ? `${profile.rating.toFixed(1)}/5` : 'N/A'} accent />
+          <StatCard icon={Users} label="Reviews" value={profile.reviews ? `${profile.reviews}+` : '0'} />
           <StatCard icon={Award} label="Orders in Queue" value={profile.ordersInQueue ?? 0} />
           <StatCard icon={Shield} label="Member Since" value={profile.memberSince ? formatDate(profile.memberSince) : 'N/A'} />
         </div>
@@ -244,94 +297,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
               </div>
             )}
 
-            {/* Services/Gigs */}
-            {profile.gigs?.length > 0 && (
-              <div className="rounded-2xl sm:rounded-3xl border border-gray-800/80 bg-black/50 backdrop-blur-xl overflow-hidden">
-                <div className="p-4 sm:p-6 md:p-8">
-                  <div className="flex items-center justify-between mb-6 sm:mb-8">
-                    <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2 sm:gap-3">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-gray-500 to-gray-600 rounded-lg flex items-center justify-center">
-                        <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-                      </div>
-                      My Services
-                    </h2>
-                    <button className="text-gray-400 hover:text-gray-300 transition-colors flex items-center gap-1 text-sm">
-                      <span className="hidden sm:inline">View all</span>
-                      <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
-                    </button>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    {profile.gigs.slice(0, 2).map((gig) => (
-                      <div key={gig.id} className="group relative rounded-xl sm:rounded-2xl overflow-hidden border border-gray-800/50 bg-gray-900/30 hover:bg-gray-800/50 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl">
-                        <div className="aspect-video relative overflow-hidden">
-                          <img 
-                            src={gig.coverUrl}
-                            alt={gig.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                          <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
-                            <Badge variant="accent">Featured</Badge>
-                          </div>
-                        </div>
-                        <div className="p-4 sm:p-6">
-                          <h3 className="text-white font-semibold mb-3 group-hover:text-gray-300 transition-colors line-clamp-2 text-sm sm:text-base">
-                            {gig.title}
-                          </h3>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 sm:gap-3">
-                              <Stars rating={gig.rating} />
-                              <span className="text-gray-400 text-xs sm:text-sm">({gig.reviews})</span>
-                            </div>
-                            <div className="text-right">
-                              <span className="text-gray-400 text-xs sm:text-sm">Starting at</span>
-                              <div className="text-gray-300 font-bold text-lg sm:text-xl">${gig.priceFrom}</div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Services section removed - using real services data from database */}
 
-            {/* Reviews */}
-            {profile.reviewsList?.length ? (
-              <div className="rounded-2xl sm:rounded-3xl border border-gray-800/80 bg-black/50 backdrop-blur-xl overflow-hidden">
-                <div className="p-4 sm:p-6 md:p-8">
-                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-6 sm:mb-8 flex items-center gap-2 sm:gap-3">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center">
-                      <Star className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-                    </div>
-                    Client Reviews
-                  </h2>
-                  
-                  <div className="space-y-4 sm:space-y-6">
-                    {profile.reviewsList.map((r) => (
-                      <div key={r.id} className="relative p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gray-900/30 border border-gray-800/50 hover:bg-gray-800/50 transition-all duration-300">
-                        <div className="flex gap-3 sm:gap-4">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0">
-                            {r.author[0]}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                              <span className="text-white font-semibold text-sm sm:text-base truncate">{r.author}</span>
-                              <div className="flex items-center gap-2">
-                                <Stars rating={r.rating} />
-                                <span className="text-gray-500 text-xs sm:text-sm">{new Date(r.date).toLocaleDateString()}</span>
-                              </div>
-                            </div>
-                            <p className="text-gray-300 leading-relaxed text-sm sm:text-base">{r.content}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : null}
+            {/* Reviews section removed - will be implemented with real data in the future */}
           </div>
 
           {/* Sidebar */}
@@ -345,7 +313,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {profile.skills.map((skill) => (
-                    <Badge key={skill}>{skill}</Badge>
+                    <ProfileBadge key={skill}>{skill}</ProfileBadge>
                   ))}
                 </div>
               </div>
@@ -362,41 +330,108 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
                   {profile.languages.map((l) => (
                     <div key={l.name} className="flex items-center justify-between p-3 rounded-xl bg-gray-900/30 border border-gray-800/50">
                       <span className="text-gray-200 text-sm sm:text-base truncate">{l.name}</span>
-                      <Badge variant={l.level === 'Native/Bilingual' ? 'success' : 'default'}>
+                      <ProfileBadge>
                         {l.level}
-                      </Badge>
+                      </ProfileBadge>
                     </div>
                   ))}
                 </div>
               </div>
             ) : null}
 
-            {/* Portfolio Preview */}
-            {profile.portfolio?.length ? (
-              <div className="rounded-2xl sm:rounded-3xl border border-gray-800/80 bg-black/50 backdrop-blur-xl p-4 sm:p-6">
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <h3 className="text-base sm:text-lg font-semibold text-white flex items-center gap-2">
-                    <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
-                    Portfolio
-                  </h3>
-                  <button className="text-gray-400 hover:text-gray-300 text-xs sm:text-sm transition-colors">View All</button>
+            {/* Portfolio section removed - will be implemented with real data in the future */}
+          </div>
+        </div>
+      </div>
+      
+      {/* Services Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12">
+        <div className="rounded-2xl sm:rounded-3xl border border-gray-800/80 bg-black/50 backdrop-blur-xl overflow-hidden">
+          <div className="p-4 sm:p-6 md:p-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
+              <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2 sm:gap-3">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <Package className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 </div>
-                <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                  {profile.portfolio.map((p) => (
-                    <div key={p.id} className="group relative aspect-square rounded-lg sm:rounded-xl overflow-hidden border border-gray-800/50 hover:border-gray-700 transition-all duration-300">
-                      <img 
-                        src={p.imageUrl}
-                        alt={p.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                Services
+              </h2>
+              
+              {/* Only show these buttons if the profile belongs to the current user */}
+              {currentUser && currentUser.username === username && (
+                <div className="flex flex-wrap gap-3">
+                  <Link 
+                    href="/account/services/create" 
+                    className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 text-sm font-medium"
+                  >
+                    <Plus size={16} />
+                    Add Service
+                  </Link>
+                  <Link 
+                    href="/account/services" 
+                    className="flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-xl hover:bg-white/20 transition-all duration-200 text-sm font-medium"
+                  >
+                    <Settings size={16} />
+                    Manage All Services
+                  </Link>
+                </div>
+              )}
+            </div>
+            
+            {/* Services grid */}
+            {services.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {services.map((service: Service) => (
+                  <div key={service.id} className="group relative bg-gray-900/30 border border-gray-800/50 rounded-xl sm:rounded-2xl overflow-hidden hover:bg-gray-800/50 hover:shadow-lg transition-all duration-300">
+                    {/* Service card */}
+                    <ServiceCard
+                      key={service.id}
+                      id={service.id}
+                      title={service.title}
+                      description={service.description}
+                      coverUrl={service.coverUrl}
+                      category={service.category}
+                      priceFrom={service.priceFrom}
+                      priceTo={service.priceTo}
+                      deliveryDays={service.deliveryDays}
+                      username={username}
+                      displayName={profile.displayName || username}
+                      avatarUrl={profile.avatarUrl}
+                    />
+                    
+                    {/* Action buttons - only visible to profile owner */}
+                    {currentUser && currentUser.username === username && (
+                      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <Link href={`/account/services/edit/${service.id}`} className="bg-white/10 backdrop-blur-md hover:bg-white/20 p-2 rounded-full inline-block shadow-lg">
+                          <Edit size={16} className="text-white" />
+                        </Link>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            ) : null}
+            ) : (
+              <div className="text-center py-12 bg-gray-900/30 border border-gray-800/50 rounded-xl">
+                <Package className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-semibold text-white">No services</h3>
+                <p className="mt-1 text-sm text-gray-400">
+                  {currentUser && currentUser.username === username
+                    ? "Get started by creating a new service."
+                    : "This freelancer hasn't added any services yet."}
+                </p>
+                
+                {currentUser && currentUser.username === username && (
+                  <div className="mt-6">
+                    <Link
+                      href="/account/services/create"
+                      className="inline-flex items-center gap-x-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:from-blue-600 hover:to-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    >
+                      <Plus className="-ml-0.5 h-4 w-4" aria-hidden="true" />
+                      Create new service
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

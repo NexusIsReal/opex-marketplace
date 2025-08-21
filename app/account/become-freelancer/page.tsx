@@ -477,7 +477,15 @@ export default function BecomeFreelancer() {
                     <CheckCircle className="h-5 w-5 text-emerald-400" />
                     <AlertTitle className="text-emerald-300 font-semibold">Application Approved! 🎉</AlertTitle>
                     <AlertDescription className="text-emerald-200">
-                      Congratulations! Your application has been approved. You now have full access to freelancer features and can start taking on projects.
+                      Congratulations! Your application has been approved. Complete your freelancer profile to start taking on projects.
+                      <div className="mt-4">
+                        <Button 
+                          onClick={() => router.push('/account/become-freelancer/profile-setup')}
+                          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                        >
+                          Complete Your Profile
+                        </Button>
+                      </div>
                     </AlertDescription>
                   </Alert>
                 )}

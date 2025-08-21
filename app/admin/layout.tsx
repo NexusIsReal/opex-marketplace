@@ -11,7 +11,8 @@ import {
   Settings, 
   LogOut,
   Menu,
-  X
+  X,
+  FileText
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,11 @@ function AdminLayout({ children }: AdminLayoutProps) {
       name: "Freelancers",
       href: "/admin/freelancers",
       icon: <Briefcase className="w-5 h-5" />,
+    },
+    {
+      name: "Applications",
+      href: "/admin/applications",
+      icon: <FileText className="w-5 h-5" />,
     },
     {
       name: "Services",

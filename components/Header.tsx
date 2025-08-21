@@ -9,7 +9,8 @@ export default function Header({ fixed = true }: { fixed?: boolean }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const { user, logout } = useAuth();
+  const [isFreelancer, setIsFreelancer] = useState(false);
+  const { user, logout, token } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,6 +22,37 @@ export default function Header({ fixed = true }: { fixed?: boolean }) {
       return () => window.removeEventListener('scroll', handleScroll);
     }
   }, [fixed]);
+  
+  // Check if user is a freelancer
+  useEffect(() => {
+    const checkFreelancerStatus = async () => {
+      if (!user || !token) return;
+      
+      try {
+        // Check if user role is FREELANCER
+        if (user.role === 'FREELANCER') {
+          setIsFreelancer(true);
+          return;
+        }
+        
+        // Otherwise check if they have an approved application
+        const response = await fetch('/api/freelancer/application', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setIsFreelancer(data.application && data.application.status === 'APPROVED');
+        }
+      } catch (error) {
+        console.error('Error checking freelancer status:', error);
+      }
+    };
+    
+    checkFreelancerStatus();
+  }, [user, token]);
   
   // Fetch unread message count
   useEffect(() => {
@@ -146,13 +178,13 @@ export default function Header({ fixed = true }: { fixed?: boolean }) {
           <div className="hidden lg:flex items-center space-x-6 relative z-10">
             {user ? (
               <div className="flex items-center space-x-4">
-                {/* Become Freelancer Link */}
+                {/* Become Freelancer or Freelancer Profile Link */}
                 <Link 
-                  href="/account/become-freelancer" 
+                  href={isFreelancer ? `/profile/${user?.username}` : "/account/become-freelancer"}
                   className="group text-sm font-semibold text-gray-300 hover:text-gray-100 transition-all duration-400 px-4 py-3 rounded-xl hover:backdrop-blur-sm hover:bg-gray-800/[0.3] border border-transparent hover:border-gray-400/[0.15] hover:shadow-lg relative overflow-hidden flex items-center gap-2"
                 >
                   <UserPlus className="h-4 w-4" />
-                  <span className="relative z-10">Become Freelancer</span>
+                  <span className="relative z-10">{isFreelancer ? "Freelancer Profile" : "Become Freelancer"}</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-gray-700/[0.1] to-gray-600/[0.1] opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
                 </Link>
                 
@@ -283,13 +315,13 @@ export default function Header({ fixed = true }: { fixed?: boolean }) {
             <div className="pt-3 sm:pt-4 border-t border-gray-500/[0.15] flex flex-col space-y-2 sm:space-y-3">
               {user ? (
                 <>
-                  {/* Become Freelancer Link */}
+                  {/* Become Freelancer or Freelancer Profile Link */}
                   <Link 
-                    href="/account/become-freelancer" 
+                    href={isFreelancer ? `/profile/${user?.username}` : "/account/become-freelancer"}
                     className="text-sm font-semibold text-gray-300 hover:text-gray-100 transition-all duration-400 py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl hover:backdrop-blur-sm hover:bg-gray-800/[0.3] border border-transparent hover:border-gray-400/[0.15] hover:shadow-lg flex items-center gap-2"
                   >
                     <UserPlus className="h-4 w-4" />
-                    Become Freelancer
+                    {isFreelancer ? "Freelancer Profile" : "Become Freelancer"}
                   </Link>
                   
                   {/* Messages Link with Notification */}

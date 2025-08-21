@@ -177,3 +177,45 @@ export async function getAuthFromRequest(req: NextRequest) {
     return null;
   }
 }
+
+// Function to get authentication in server components using cookies
+export async function getServerSession(cookieStore: any) {
+  try {
+    // Make sure cookieStore is awaited before using it
+    const resolvedCookieStore = await cookieStore;
+    
+    // Get the session token from cookies
+    const sessionToken = resolvedCookieStore.get('session-token')?.value;
+    
+    if (!sessionToken) {
+      return null;
+    }
+    
+    // Verify the token
+    const decoded = await verifyToken(sessionToken);
+    if (!decoded) {
+      return null;
+    }
+    
+    // Check if user exists
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+    });
+    
+    if (!user) {
+      return null;
+    }
+    
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role
+      }
+    };
+  } catch (error) {
+    console.error('Error in getServerSession:', error);
+    return null;
+  }
+}
