@@ -219,3 +219,39 @@ export async function getServerSession(cookieStore: any) {
     return null;
   }
 }
+
+// Function to verify authentication from request
+export async function verifyAuth(req: NextRequest) {
+  try {
+    // Extract token from Authorization header
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return { success: false, error: 'No token provided' };
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = await verifyToken(token);
+
+    if (!decoded) {
+      return { success: false, error: 'Invalid token' };
+    }
+
+    // Check if user exists
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+    });
+
+    if (!user) {
+      return { success: false, error: 'User not found' };
+    }
+
+    return {
+      success: true,
+      userId: user.id,
+      role: user.role
+    };
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return { success: false, error: 'Authentication failed' };
+  }
+}

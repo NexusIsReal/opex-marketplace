@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
             user: {
               select: {
                 username: true,
-                displayName: true
+                id: true
               }
             }
           }

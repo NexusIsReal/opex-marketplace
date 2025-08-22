@@ -4,29 +4,29 @@ export type ServiceWithProfile = {
   id: string;
   title: string;
   description: string;
-  coverUrl: string;
+  coverUrl: string | null;
   category: string;
   priceFrom: number;
-  priceTo: number;
+  priceTo: number | null;
   deliveryDays: number;
   revisions: number;
   features: string;
-  tags: string;
+  tags: string | null;
   createdAt: Date;
   updatedAt: Date;
   profileId: string;
   profile?: {
     id: string;
     userId: string;
-    displayName: string | null;
+    displayName?: string | null;
     avatarUrl: string | null;
     tagline: string | null;
     about: string | null;
     location: string | null;
     memberSince: Date | null;
     lastDelivery: Date | null;
-    languages: any | null;
-    skills: string[] | null;
+    languages: string | string[] | null;
+    skills: string | string[] | null;
     rating: number | null;
     reviews: number | null;
     ordersInQueue: number | null;
@@ -57,7 +57,8 @@ export async function getAllServices(): Promise<ServiceWithProfile[]> {
       }
     });
     
-    return services;
+    // Type assertion to match our ServiceWithProfile type
+    return services as unknown as ServiceWithProfile[];
   } catch (error) {
     console.error('Error fetching services:', error);
     return [];
@@ -82,7 +83,8 @@ export async function getServiceById(id: string): Promise<ServiceWithProfile | n
       }
     });
     
-    return service;
+    // Type assertion to match our ServiceWithProfile type
+    return service as unknown as ServiceWithProfile | null;
   } catch (error) {
     console.error(`Error fetching service with id ${id}:`, error);
     return null;
@@ -94,6 +96,7 @@ export function parseServiceFeatures(featuresString: string): string[] {
   return featuresString.split(',').map(feature => feature.trim());
 }
 
-export function parseServiceTags(tagsString: string): string[] {
+export function parseServiceTags(tagsString: string | null): string[] {
+  if (!tagsString) return [];
   return tagsString.split(',').map(tag => tag.trim());
 }
